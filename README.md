@@ -1,6 +1,6 @@
 ##About:
 
- Doktor ZAP is a graphical (TK) python Whatsapp client based on Yowsup. Read that module's docs for info on registration, and fundamentals if you're planning to modify this interface. There is some emphasis on message automation (aka a BOT) here, and the functions on this aspect that retrieve data from various websites (I tailored for my personal suit) return PT-BR text. You can use them as a direction to make your own.
+ Doktor ZAP is a graphical (TK) python Whatsapp client based on Yowsup. Read that module's docs for info on registration, and fundamentals if you're planning to modify this interface. There is some emphasis on message automation (aka BOT) here, and the functions on this aspect that retrieve data from various websites (I tailored for my personal suit) return PT-BR text. You can use them as a direction to make your own.
 
 ##Dependencies:
 
@@ -8,7 +8,7 @@ YOWSUP:  https://github.com/tgalal/yowsup
 
 ## Run:
 
-Extract all and run doktorzap_run.py
+Extract all and run dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).
 
 
 ## TIP
