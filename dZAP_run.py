@@ -32,7 +32,7 @@ from time import *
 import re
  
 CREDENTIALS = ('','')  # replace with your phone and password
-from doktor_bot import *
+from d_bot import *
 
 class auth_window():
     def __init__(self):
