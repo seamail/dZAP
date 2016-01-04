@@ -422,7 +422,7 @@ def retrieve_salmo():
 
 
 class Retrieve():
-    def __init__(self, CALLWORD, URL, FTRIM='',BTRIM='', FRTRIM='', BRTRIM='', REBOUND_KEY='032442301sda1sd', ERROR_KEY='koytr1we0ewrt', FUNCTYPE='keyword', CHARSET='latin-1'):
+    def __init__(self, CALLWORD, URL, FTRIM='',BTRIM='', FRTRIM='', BRTRIM='', REBOUND_KEY=b'032442301sda1sd', ERROR_KEY=b'koytr1we0ewrt', FUNCTYPE='keyword', CHARSET='latin-1'):
         
         self.URL = URL
         self.TRIGGER_WORD = CALLWORD
@@ -465,9 +465,9 @@ class Retrieve():
             print(SOURCE[Z:K])
             print(SOURCE[Z:K].decode('UTF-8', 'ignore'))
             print(SOURCE[Z:K].decode('latin-1', 'ignore'))
-            SOURCETO = self.URL
+            SOURCETO = self.URL.encode('UTF-8', 'ignore')
             SOURCE = SOURCETO.decode('unicode_escape', 'ignore') + quote(SOURCE[Z:K])
-            print(SOURCE)
+            #print(SOURCE)
      
             SOURCE = urlopen((SOURCE),timeout=20).read()#.decode('latin-1', 'ignore')
         
@@ -484,10 +484,10 @@ class Retrieve():
 AUTO_RETRIEVE=[]
 
 AUTO_RETRIEVE.append(Retrieve('@dict', 'http://www.dicio.com.br/pesquisa.php?q=', FTRIM=b'</h2>', BTRIM=b'<h2 class="tit-section">',
-                              FRTRIM=b'href="', BRTRIM='">', REBOUND_KEY=b'class="resultados">', ERROR_KEY = b'o foram encontradas'))
+                              FRTRIM=b'href="', BRTRIM=b'">', REBOUND_KEY=b'class="resultados">', ERROR_KEY = b'o foram encontradas'))
 
 AUTO_RETRIEVE.append(Retrieve('@indict', 'http://www.dicionarioinformal.com.br/', FTRIM=b'<p class="text-justify">', BTRIM=b'</p>',
-                FRTRIM=b'<div class="di-blue-link" style="font-size:20px;"><a href="', BRTRIM=B'"', REBOUND_KEY = b'Nenhuma Defini'))
+                FRTRIM=b'<div class="di-blue-link" style="font-size:20px;"><a href="', BRTRIM=b'"', REBOUND_KEY = b'Nenhuma Defini'))
 
 AUTO_RETRIEVE.append(Retrieve('@wiki', 'https://pt.wikipedia.org/wiki/', FTRIM=b'<p>', BTRIM=b'</p>', FRTRIM=b'<span class="searchmatch>', BRTRIM=b'</span>',
                               REBOUND_KEY= b'A mostrar resultados para', ERROR_KEY = b'o produziu resultados.', CHARSET='UTF-8'))
