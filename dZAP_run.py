@@ -23,16 +23,40 @@ from yowsup import env
 
 import datetime
 
-
-
 from tkinter import *
 from threading import * 
 from time import *
 
 import re
- 
-CREDENTIALS = ('','')  # replace with your phone and password
+
 from d_bot import *
+
+
+
+
+
+def retrieve_credentials():
+    if os.path.isfile('CREDENTIALS'):
+        _CRED = open('CREDENTIALS', 'r').readlines()
+        PH = None
+        PASS = None
+        for line in _CRED:
+            if 'phone' in line:
+                PH = line.split('=')
+                PH = PH[1].split('\n')[0]
+            elif 'password' in line:
+                PASS = line.split('=',1)
+                PASS = PASS[1].split('\n')[0]
+
+        if (PH) and (PASS):
+            return (PH,PASS)
+
+    return ('','')
+
+
+CREDENTIALS = retrieve_credentials()
+
+
 
 class auth_window():
     def __init__(self):
@@ -69,12 +93,12 @@ class displayed_message(Frame):
 
 
         self.F_=Label(master=self, text=FROM)
-        self.F_.grid(column = 0, row = 0)
+        self.F_.grid(column = 1, row = 0)
         self.D_=Label(master=self,text=DATE)
-        self.D_.grid(column = 0, row = 1)
+        self.D_.grid(column = 0, row = 0, sticky=W)
 
         self.C_=Label(master=self,text=text_content)
-        self.C_.grid(column = 1, row = 1)
+        self.C_.grid(column = 0, row = 1, columnspan=2,sticky=W)
         self.S_=Label(master=self,text="            ")
         self.S_.grid(column = 0, row = 2)
         
@@ -148,6 +172,8 @@ class window(Thread):
         self.YOWCLI = stack.getLayer(6)
 
         self.SHOWNMESSAGE = []
+
+                                     
     def getinfo(self):
         self.YOWCLI.group_info(self.address)
 
@@ -184,10 +210,12 @@ class window(Thread):
         
 
 
-        self.VISOR = Frame(self.root, height = 500, width=73)
+        self.VISOR = Frame(self.root, height = 600, width=500)
         self.VISOR.grid(column=0,row=0,columnspan=4)
-
-
+        self.VISOR.grid_propagate(False)
+        '''for I in range(10):
+            self.SHOWNMESSAGE.append(displayed_message(" ", " ", " ", master=self.VISOR))
+            self.SHOWNMESSAGE[I].grid(column=0, row=I)'''
   
         
         self.TEXTIN = Text(self.root, height=2, width=73)
@@ -319,7 +347,7 @@ class window(Thread):
         for M in range(len(self.SHOWNMESSAGE)):
             self.SHOWNMESSAGE[M].grid_forget()
         for M in range(len(self.SHOWNMESSAGE)):
-            self.SHOWNMESSAGE[M].grid(in_=self.VISOR, column=0,row=M)
+            self.SHOWNMESSAGE[M].grid(column=0,row=M, sticky=W)
         
 
         self.MSGABSINDEX+=1
@@ -347,7 +375,6 @@ class window(Thread):
 
                 I+=1
         
-
 
 
 
@@ -383,5 +410,4 @@ if __name__==  "__main__":
 
     app = window()
     stack.loop()
-
 
