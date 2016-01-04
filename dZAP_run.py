@@ -55,6 +55,7 @@ class auth_window():
 
         self.root.wm_title('Authentication')
         self.root.mainloop()
+        
     def auth (self):
         print((self.txt_phone.get('1.0',END),self.txt_pass.get('1.0',END)))
         global CREDENTIALS
@@ -90,7 +91,8 @@ class window(Thread):
             self.label.grid(column=0, row=index+2)
 
             self.ACT = Button(master)
-            self.ACT['text'] = X
+            self.ACT['text'] = ' '
+            self.ACT['activebackground'] = 'grey'
             self.ACT['command'] = self.activate
             self.ACT['background'] = 'black'
             self.ACT.grid(column=1, row=index+2)
@@ -104,10 +106,12 @@ class window(Thread):
             if self.ACTIVE == 1:
                 self.ACTIVE = 0
                 self.ACT['background'] = 'black'
+                self.ACT['activebackground'] = 'dim grey'
 
             else:
                 self.ACTIVE = 1
-                self.ACT['background'] = 'green'
+                self.ACT['background'] = 'olive drab'
+                self.ACT['activebackground'] = 'yellow green'
 
     class automation():
         def __init__(self, triggerTXT, action):
@@ -156,8 +160,10 @@ class window(Thread):
         sent=0
         CONTENT = self.TEXTIN.get("1.0",END)
 
-        if event == 'dict':
-            CONTENT = retrieve_dicionario(CONTENT)
+        for AUTO in AUTO_RETRIEVE:
+            if AUTO.TRIGGER_WORD == event:
+                CONTENT = AUTO.retrieve(CONTENT)
+
 
         
         for GROUP in self.GROUPS:
@@ -197,8 +203,6 @@ class window(Thread):
 
         self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
 
-        self.SENDICT = Button(self.root, text ="@dict", command = lambda: self.sendtext(event='dict')).grid(column=2,row=4)
-
                               
         self.ADM = Button(self.root, text = 'toADM')
         self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.contacts['holex'], '5522998800908')
@@ -212,6 +216,10 @@ class window(Thread):
         self.AUTOMATE = Menu(self.menubar)
         self.AUTOMATE.add_command(label="Turn ON/OFF", background="red")
         self.AUTOMATE.add_command(label="MANAGE", command = lambda: self.automate_window())
+        self.AUTOMATE.add_separator()
+        self.AUTOMATE.add_command(label ="@dict", command = lambda: self.sendtext(event='@dict'))
+        self.AUTOMATE.add_command(label ="@indict", command = lambda: self.sendtext(event='@indict'))
+        self.AUTOMATE.add_command(label ="@wiki", command = lambda: self.sendtext(event='@wiki'))
 
         self.PROFILE = Menu(self.menubar)
         self.PROFILE.add_command(label="SET NICK", command = lambda: self.edit_profile('nick'))
@@ -282,7 +290,7 @@ class window(Thread):
         INDEX = self.MSGABSINDEX*3
 
         try:
-            text_content = message.getBody().decode('latin-1','ignore')
+            text_content = message.getBody().decode('utf-8','ignore')
         except AttributeError:
             text_content = message.getBody()
 
@@ -375,4 +383,5 @@ if __name__==  "__main__":
 
     app = window()
     stack.loop()
+
 
