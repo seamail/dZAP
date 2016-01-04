@@ -11,7 +11,9 @@ YOWSUP:  https://github.com/tgalal/yowsup
 Extract all and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).
 
 
-## TIP
+## TIP:
 
  If you invite anyone who's not in your contact list to a group, you will get banned from whatsapp's network for 24h. They will know you are using a non-official client, so they ban, because this action is not possible on the original app. *you will get banned on the second event of this nature.
- Maybe other actions like massively broadcasting a message will also result in ban.
+ Probably other suspicious actions like massively broadcasting a message will also result in ban.
+ Recurring bans may result in permanent ban for your phone number, creating a new account on it will not be possible.
+ Remember Whatsapp can refine it's unnoficial client detection mechanisms at any moment, and you may be permanently banned just by sucessfully logging in on this tool. And remember that this software comes with no warranty.
