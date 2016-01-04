@@ -1,6 +1,6 @@
 ##About:
 
- Doktor ZAP is a graphical (TK) python client based on Yowsup. Read that module's docs for info on registration, and fundamentals if you're planning to modify this interface. There is some emphasis on message automation (aka a BOT) here, and the functions on this aspect that retrieve data from various websites (I tailored for my personal suit) return PT-BR text. You can use them as a direction to make your own.
+ Doktor ZAP is a graphical (TK) python Whatsapp client based on Yowsup. Read that module's docs for info on registration, and fundamentals if you're planning to modify this interface. There is some emphasis on message automation (aka a BOT) here, and the functions on this aspect that retrieve data from various websites (I tailored for my personal suit) return PT-BR text. You can use them as a direction to make your own.
 
 ##Dependencies:
 
