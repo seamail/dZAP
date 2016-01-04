@@ -25,7 +25,7 @@ from yowsup.common.tools import ModuleTools
 
 from yowsup.layers                             import YowParallelLayer
 
-from doctor_bot import *
+from d_bot import *
 
 
 
