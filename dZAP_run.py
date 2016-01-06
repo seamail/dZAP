@@ -228,13 +228,15 @@ class window(Thread):
 
         self.SENDVOICE = Button(self.root, text= 'SENDVOICE', command = self.send_voice).grid(column=2,row=3)
 
+        
+
         self.REFRESH = Button(self.root, text = 'REFRESH', command = self.getinfo).grid(column=3,row=4)
 
         self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
 
                               
         self.ADM = Button(self.root, text = 'toADM')
-        self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.contacts['holex'], '5522998800908')
+        #self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.contacts['holex'], '5522998800908')
         self.ADM.grid(column=3,row=2)
 
         
@@ -249,6 +251,7 @@ class window(Thread):
         self.AUTOMATE.add_command(label ="@dict", command = lambda: self.sendtext(event='@dict'))
         self.AUTOMATE.add_command(label ="@indict", command = lambda: self.sendtext(event='@indict'))
         self.AUTOMATE.add_command(label ="@wiki", command = lambda: self.sendtext(event='@wiki'))
+        self.AUTOMATE.add_command(label ='Vestibular', command = lambda: BOT.govestibular(self.GROUPS[2].address, self.GROUPS[2].PARTICIPANTS))
 
         self.PROFILE = Menu(self.menubar)
         self.PROFILE.add_command(label="SET NICK", command = lambda: self.edit_profile('nick'))
@@ -381,12 +384,16 @@ class window(Thread):
 
 
 
-        
+
+
+    
 
 if __name__==  "__main__":
     if len(CREDENTIALS[0]) < 2:
         print(CREDENTIALS[0])
         auth_w = auth_window()
+
+    
 
     
     layers = (
@@ -403,13 +410,13 @@ if __name__==  "__main__":
 
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
 
-    def CLIsend_message(TO, MESSAGE):
-        stack.getLayer(6).message_send(TO, MESSAGE)
+    
+    #setting bot and cli layer to know each other.
+    BOT = stack.getLayer(6).getBot()
+    BOT.getCliLayer(stack.getLayer(6))
 
-
-
-
-
+    
+    #starting the GUI and client.
     app = window()
     stack.loop()
 
