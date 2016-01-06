@@ -30,6 +30,7 @@ class Bot():
         self.BANWORD = []#[['55','@porn']]
         self.load_banword()
 
+        self.ONvestibular=0
         
         
     def load_banword(self):
@@ -46,7 +47,7 @@ class Bot():
 
 
                 
-    def read_output(self, output, sender):
+    def read_output(self, output, sender, participant):
 
         output = output.lower()
         
@@ -180,25 +181,19 @@ class Bot():
             return retrieve_drugs()
 
 
-
-        '''elif '@dict' in output:
-            O = output.split(" ")
-            if len(O) > 1:
-                if len(O[1]) > 2:
-                    if '!' in output:
-                        return create_voice(retrieve_dicionario(O[1]))
-                    else:                        
-                        return retrieve_dicionario(O[1])
+        elif '@enema' in output:
+            return vestibular_questao()[0]
 
 
-        elif '@indict' in output:
-            O = output.split(" ")
-            if len(O) > 1:
-                if len(O[1]) > 2:
-                    if '!' in output:
-                        return create_voice(retrieve_dicionario_informal(O[1]))
-                    else:                        
-                        return retrieve_dicionario_informal(O[1])'''
+        #elif '@vestibular' in output:
+        #    if self.ONvestibular == 0: self.ONvestibular = Vestibular(sender, sender.getParticipants, self.CliLayer, self)
+
+        elif '#' in output:
+            if self.ONvestibular:
+                self.ONvestibular.getanswer(output, participant)
+
+
+        
 
         for AUTO in AUTO_RETRIEVE:
             OUT = AUTO.trigger(output)
@@ -206,7 +201,21 @@ class Bot():
                 return OUT
 
 
-            
+
+
+    def getCliLayer(self, layer):
+        self.CliLayer = layer
+
+    def sendmessage(self, TO, MSG):
+        self.CliLayer.message_send(TO, MSG)
+
+
+
+    def govestibular(self, group, party):
+        self.ONvestibular = Vestibular(group,party,self.CliLayer,self)
+
+
+
 def retrieve_joke():
     URL ="http://www.piadas.com.br"
     content = urlopen(URL+"/piadas-engracadas").readlines()
@@ -421,6 +430,174 @@ def retrieve_salmo():
 
 
 
+
+
+
+
+
+class Vestibular():
+    def __init__(self, group, participants, CLI, BOT):
+        self.SCORES = []
+        self.group = group
+        self.participants = participants
+        self.CLI = CLI
+
+        self.BOT = BOT
+        self.resposta = ''
+
+        self.questoesN = 0
+        for PARTICIPANT in participants:
+            self.SCORES.append([PARTICIPANT, 0])
+
+
+        self.sendmessage(self.group, 'hora do vestibular rapaziada bora garantir sua vaga no mercado de escravos..... digite #a, #b, #c etc.. para responder. Lembrando, eu não boto fé em vocês.')
+        self.mandar_questao()
+    def sendmessage(self, TO, MSG):
+        self.CLI.message_send(TO,MSG)
+
+        
+    def mandar_questao(self):
+        self.questoesN += 1
+
+        self.ONvestibular=1
+
+        
+            
+        
+        
+        
+        QUESTAO = vestibular_questao()
+        print(QUESTAO)
+        self.sendmessage(self.group, QUESTAO[0])
+        if len(QUESTAO)>7:
+            self.sendpic(QUESTAO[7])
+        for i in range(len(QUESTAO)-2):
+            self.sendmessage(self.group, QUESTAO[i+1])
+            sleep(1)
+
+        self.resposta = QUESTAO[6]
+
+
+
+    def getanswer(self, tentativa, sender):
+        resp = tentativa[1]
+        
+        print('tentaram responder. %s' % self.resposta)
+        print(resp)
+        print(sender)
+        print(self.SCORES)
+        for I in range(len(self.SCORES)):
+            if sender in self.SCORES[I][0]:
+                        
+                if resp in self.resposta.lower()[:2]:
+                    self.sendmessage(self.group, '%s acertou mlk' % sender)
+                    self.SCORES[I][1]+=1
+
+                    self.sendmessage(self.group, '%s já soma %i pontos.. sapoha eh meu orgulho.' % (sender, self.SCORES[I][1]))
+                    if self.SCORES[I][1] == 5:
+                        self.fim(sender)
+                            
+                    
+                else:
+                    self.sendmessage(self.group, '%s errou!, está eliminado, ke pena... sintam o cheiro do fracasso.' % sender)
+                    self.SCORES.pop(I)
+                    
+                if (self.questoesN > 20) or (self.SCORES==1):
+                    self.fim(0)
+                    return
+                self.mandar_questao()       
+                break
+    def fim(self, won):
+        self.sendmessage(self.group, 'fim do vestiba... me entrega o envelope dos vencedores, darlene.')
+        if won == 0:
+            self.sendmessage(self.group, 'voces todos perderam, são burros pra krl! não vo zoar pq devem ter tido alguma doença grave na infância.')
+
+        else:
+            self.sendmessage(self.group, '%s ganhou! meus parabens seu retardado!' % won)
+        self.BOT.ONvestibular = 0
+
+    def sendpic(self, picurl):
+        
+        filename = 'vestibacache.jpg'
+        FILE = urlopen(picurl)
+        Fo = open(filename, 'wb')
+        Fo.write(FILE.read())
+        Fo.close()
+        
+        self.CLI.image_send(group, filename)
+        
+def vestibular_questao():
+
+    URL = 'http://www.professor.bio.br/'
+
+    CATEGORY = ['portugues', '', 'geografia', 'quimica']
+
+    SEARCH = ['bicho', 'inseto', 'pedra', 'molecula']
+
+    _C=randrange(len(CATEGORY))
+
+
+    URL += CATEGORY[_C]
+    URL += '/search.asp?search='+ SEARCH[_C]
+
+    #print(URL)
+
+    SOURCE = urlopen(URL).read().decode('latin-1', 'ignore')
+
+    questions = [m.start() for m in re.finditer('pergunta:', SOURCE)]
+
+    Z = questions[randrange(len(questions))]
+    Z+=9
+
+    K = SOURCE.find('<strong>', Z)
+
+
+    Zr = SOURCE.find('resposta:',K)
+    Zr+=9
+
+    Kr = SOURCE.find('<br>', Zr)
+
+    IMG = SOURCE[Z:K].find('img src=')
+    if IMG >-1:
+        IMGe = SOURCE[Z:K].find('>', IMG)
+        IMG = SOURCE[IMG:IMGe]
+        try:
+            openurl(IMG)
+        except ValueError:
+            return vestibular_questao()
+    
+
+    PERGUNTA = re.compile(r'<[^>]+>').sub('', SOURCE[Z:K].replace('<br>','\n'))
+
+    if PERGUNTA.find('e)') == -1: return vestibular_questao()
+
+    rA = PERGUNTA[PERGUNTA.find('a)'):PERGUNTA.find('b)')]
+    rB = PERGUNTA[PERGUNTA.find('b)'):PERGUNTA.find('c)')]
+    rC = PERGUNTA[PERGUNTA.find('c)'):PERGUNTA.find('d)')]
+    rD = PERGUNTA[PERGUNTA.find('d)'):PERGUNTA.find('e)')]
+    rE = PERGUNTA[PERGUNTA.find('e)'):]
+
+    PERGUNTA = PERGUNTA[:PERGUNTA.find('a)')]
+
+    RESPOSTA = re.compile(r'<[^>]+>').sub('', SOURCE[Zr:Kr])
+
+
+
+    QUESTION = [PERGUNTA,rA,rB,rC,rD,rE,RESPOSTA]   
+
+    for T in range(len(QUESTION)):
+        QUESTION[T]=QUESTION[T].replace('&quot', '').replace('\r','').strip()
+        QUESTION[T] =" ".join(QUESTION[T].split())
+        
+        if ('e)' in QUESTION[T]) and ('.' in QUESTION[T]):
+            X = QUESTION[T].find('.')
+            QUESTION[T] = QUESTION[T][:X]
+
+    if not IMG == -1:
+        QUESTION.append(IMG)
+
+    return QUESTION            
+            
 class Retrieve():
     def __init__(self, CALLWORD, URL, FTRIM='',BTRIM='', FRTRIM='', BRTRIM='', REBOUND_KEY=b'032442301sda1sd', ERROR_KEY=b'koytr1we0ewrt', FUNCTYPE='keyword', CHARSET='latin-1'):
         
@@ -449,9 +626,10 @@ class Retrieve():
     def retrieve(self, word):
 
         
-        word = ''.join(c for c in unicodedata.normalize('NFD', word) if unicodedata.category(c) != 'Mn')
+        #word = ''.join(c for c in unicodedata.normalize('NFD', word) if unicodedata.category(c) != 'Mn')
         try:
-            SOURCE = urlopen(self.URL + word).read()#.decode('latin-1', 'ignore')
+            
+            SOURCE = urlopen(self.URL + quote(word)).read()#.decode('latin-1', 'ignore')
         except urllib.error.HTTPError:
             return 'Non ecsiste.'
 
@@ -480,6 +658,9 @@ class Retrieve():
         CONTENT = re.compile(r'<[^>]+>').sub('', SOURCE[Z:K].decode(self.CHARSET,'ignore'))
 
         return CONTENT
+
+
+
 
 AUTO_RETRIEVE=[]
 
