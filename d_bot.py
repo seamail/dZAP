@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from urllib.request import urlopen
-from random import randrange
+from random import *
 
 import re
 from time import *
@@ -16,6 +16,13 @@ from urllib.parse import quote
 
 import os.path
 
+
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+
+
+
 class Bot():
     def __init__(self):
         self.TIMERp=time()-13.0
@@ -27,7 +34,7 @@ class Bot():
         self.REPn = 1
 
         
-        self.BANWORD = []#[['55','@porn']]
+        self.BANWORD = []
         self.load_banword()
 
         self.ONvestibular=0
@@ -462,7 +469,7 @@ class Vestibular():
             self.SCORES.append([PARTICIPANT, 0])
 
 
-        self.sendmessage(self.group, 'digitem #a, #b, #c etc.. para responder. Lembrando, eu não boto fé em vocês.')
+        #self.sendmessage(self.group, 'digitem #a, #b, #c etc.. para responder. Lembrando, eu não boto fé em vocês.')
         self.mandar_questao()
     def sendmessage(self, TO, MSG):
         self.CLI.message_send(TO,MSG)
@@ -480,24 +487,29 @@ class Vestibular():
         
         QUESTAO = vestibular_questao()
         print(QUESTAO)
-        self.sendmessage(self.group, QUESTAO[0])
+        self.CLI.image_send(self.group, QUESTAO[0])
+        #self.sendpic(self.group, QUESTAO[0])
+        
         if len(QUESTAO)>7:
             self.sendpic(QUESTAO[7])
-        for i in range(len(QUESTAO)-2):
-            self.sendmessage(self.group, QUESTAO[i+1])
-            sleep(1)
 
-        self.resposta = QUESTAO[6]
+        self.resposta = QUESTAO[1]
 
 
 
     def getanswer(self, tentativa, sender):
+        if len(tentativa) < 2: return
         resp = tentativa[1]
         
         print('tentaram responder. %s' % self.resposta)
         print(resp)
         print(sender)
         print(self.SCORES)
+
+
+
+
+        
         for I in range(len(self.SCORES)):
             if sender in self.SCORES[I][0]:
                         
@@ -508,19 +520,23 @@ class Vestibular():
                     self.sendmessage(self.group, '%s já soma %i pontos.. sapoha eh meu orgulho.' % (sender, self.SCORES[I][1]))
                     if self.SCORES[I][1] == 5:
                         self.fim(sender)
-                            
+                    self.mandar_questao()
+                    return        
                     
                 else:
                     self.sendmessage(self.group, '%s errou!, está eliminado, ke pena... sintam o cheiro do fracasso.' % sender)
                     self.SCORES.pop(I)
+                    #self.mandar_questao()
+                    return
                     
                 if (self.questoesN > 20) or (self.SCORES==1):
                     self.fim(0)
                     return
-                self.mandar_questao()       
+                       
                 break
-            else:
-                self.sendmessage(self.group, '%s já foi eliminado, paspalho.' % sender)
+            
+        self.sendmessage(self.group, '%s já foi eliminado, paspalho.' % sender)
+                
 
                 
     def fim(self, won):
@@ -534,7 +550,7 @@ class Vestibular():
 
     def sendpic(self, picurl):
         
-        filename = 'vestibacache.jpg'
+        filename = 'questioncache.jpg'
         FILE = urlopen(picurl)
         Fo = open(filename, 'wb')
         Fo.write(FILE.read())
@@ -578,8 +594,10 @@ def vestibular_questao():
         IMGe = SOURCE[Z:K].find('>', IMG)
         IMG = SOURCE[IMG:IMGe]
         try:
-            openurl(IMG)
+            urlopen(IMG)
         except ValueError:
+            return vestibular_questao()
+        except urllib.error.URLError:
             return vestibular_questao()
     
 
@@ -587,19 +605,42 @@ def vestibular_questao():
 
     if PERGUNTA.find('e)') == -1: return vestibular_questao()
 
-    rA = PERGUNTA[PERGUNTA.find('a)'):PERGUNTA.find('b)')]
-    rB = PERGUNTA[PERGUNTA.find('b)'):PERGUNTA.find('c)')]
-    rC = PERGUNTA[PERGUNTA.find('c)'):PERGUNTA.find('d)')]
-    rD = PERGUNTA[PERGUNTA.find('d)'):PERGUNTA.find('e)')]
-    rE = PERGUNTA[PERGUNTA.find('e)'):]
+    ALTERNS = []
+    ALTERNS.append(PERGUNTA[PERGUNTA.find('a)'):PERGUNTA.find('b)')])
+    ALTERNS.append(PERGUNTA[PERGUNTA.find('b)'):PERGUNTA.find('c)')])
+    ALTERNS.append(PERGUNTA[PERGUNTA.find('c)'):PERGUNTA.find('d)')])
+    ALTERNS.append(PERGUNTA[PERGUNTA.find('d)'):PERGUNTA.find('e)')])
+    ALTERNS.append(PERGUNTA[PERGUNTA.find('e)'):])
 
     PERGUNTA = PERGUNTA[:PERGUNTA.find('a)')]
 
     RESPOSTA = re.compile(r'<[^>]+>').sub('', SOURCE[Zr:Kr])
 
+    
+
+    shuffle(ALTERNS)
+    Letters = {0:'a',1:'b',2:'c',3:'d',4:'e'}
+    
+
+    for A in range(len(ALTERNS)):
+        RA=0
+        if ALTERNS[A][0] in RESPOSTA[:3].lower():
+            RA = 1
+
+        ALTERNS[A] = Letters[A] + ALTERNS[A][1:]
+        if RA == 1:
+            print('mudando resposta de %s para %s.' % (RESPOSTA,Letters[A]))
+            RESPOSTA = '['+Letters[A]+']]'
+            break
 
 
-    QUESTION = [PERGUNTA,rA,rB,rC,rD,rE,RESPOSTA]   
+
+
+
+    QUESTION = [PERGUNTA]
+    for ALT in ALTERNS:
+        QUESTION.append(ALT)
+    QUESTION.append(RESPOSTA)   
 
     for T in range(len(QUESTION)):
         QUESTION[T]=QUESTION[T].replace('&quot', '').replace('\r','').strip()
@@ -612,7 +653,47 @@ def vestibular_questao():
     if not IMG == -1:
         QUESTION.append(IMG)
 
-    return QUESTION            
+
+    TEXT = ''
+
+
+    for Q in range(6):
+        marker = 0
+        BREAKS = []        
+        for I in range(len(QUESTION[Q])):
+            marker+=1
+            if marker > 42:
+                if (QUESTION[Q][I] == ',') or (QUESTION[Q][I] == '.'):
+                   BREAKS.append(I+1)
+                   marker = 0
+
+
+        
+        BREAKS = list(reversed(BREAKS))
+        for B in BREAKS:
+            QUESTION[Q] = QUESTION[Q][:B] + '\n' + QUESTION[Q][B+1:]
+
+    
+    for X in range(6):
+        TEXT += QUESTION[X] + '\n \n'
+
+
+
+    font = ImageFont.truetype('arial.ttf', 16)
+    draw = ImageDraw.Draw(Image.new("RGBA", (800,600),(255,255,255)))
+    img = Image.new("RGBA", draw.textsize(TEXT,font=font),(255,255,255))
+    draw = ImageDraw.Draw(img)
+    
+
+    draw.text((0, 0),TEXT,(0,0,0),font=font)
+    
+    draw = ImageDraw.Draw(img)
+    img.save("questioncache.jpg")
+
+
+        
+
+    return ['questioncache.jpg',RESPOSTA]            
             
 class Retrieve():
     def __init__(self, CALLWORD, URL, FTRIM='',BTRIM='', FRTRIM='', BRTRIM='', REBOUND_KEY=b'032442301sda1sd', ERROR_KEY=b'koytr1we0ewrt', FUNCTYPE='keyword', CHARSET='latin-1'):
