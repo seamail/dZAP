@@ -31,7 +31,8 @@ class Bot():
         self.load_banword()
 
         self.ONvestibular=0
-        
+
+        self.window = None
         
     def load_banword(self):
         if not os.path.isfile('banword.txt'):
@@ -182,11 +183,10 @@ class Bot():
 
 
         elif '@enema' in output:
-            return vestibular_questao()[0]
-
-
-        #elif '@vestibular' in output:
-        #    if self.ONvestibular == 0: self.ONvestibular = Vestibular(sender, sender.getParticipants, self.CliLayer, self)
+            
+            if self.ONvestibular == 0:
+                print('going vestibular.')
+                self.govestibular(sender)
 
         elif '#' in output:
             if self.ONvestibular:
@@ -211,8 +211,20 @@ class Bot():
 
 
 
-    def govestibular(self, group, party):
-        self.ONvestibular = Vestibular(group,party,self.CliLayer,self)
+    def govestibular(self, group):
+        party = None
+        if not self.window:
+            print('no window.')
+            return
+        
+        print(group)
+        for G in self.window.GROUPS:
+            print('>'+G.address)
+            if G.address in group:
+                
+                party = G.PARTICIPANTS
+                
+        if party: self.ONvestibular = Vestibular(group,party,self.CliLayer,self)
 
 
 
@@ -450,7 +462,7 @@ class Vestibular():
             self.SCORES.append([PARTICIPANT, 0])
 
 
-        self.sendmessage(self.group, 'hora do vestibular rapaziada bora garantir sua vaga no mercado de escravos..... digite #a, #b, #c etc.. para responder. Lembrando, eu não boto fé em vocês.')
+        self.sendmessage(self.group, 'digitem #a, #b, #c etc.. para responder. Lembrando, eu não boto fé em vocês.')
         self.mandar_questao()
     def sendmessage(self, TO, MSG):
         self.CLI.message_send(TO,MSG)
@@ -507,6 +519,10 @@ class Vestibular():
                     return
                 self.mandar_questao()       
                 break
+            else:
+                self.sendmessage(self.group, '%s já foi eliminado, paspalho.' % sender)
+
+                
     def fim(self, won):
         self.sendmessage(self.group, 'fim do vestiba... me entrega o envelope dos vencedores, darlene.')
         if won == 0:
