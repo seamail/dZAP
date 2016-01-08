@@ -415,9 +415,9 @@ def retrieve_porn(category):
     return filename
 
 def create_voice(text):
-    FILEPATH = '/home/gabs/Desktop/max_steel/sound.wav'
+    FILEPATH = 'sound.wav'
 
-    text = text.replace('ç','ss').replace('á','ah')
+    text = text.replace('ç','ss').replace('á','ah')[:-1]
     text = ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
     text = str(text.encode('ascii', 'ignore'))
 
@@ -514,10 +514,9 @@ class Vestibular():
             if sender in self.SCORES[I][0]:
                         
                 if resp in self.resposta.lower()[:2]:
-                    self.sendmessage(self.group, '%s acertou mlk' % sender)
                     self.SCORES[I][1]+=1
 
-                    self.sendmessage(self.group, '%s já soma %i pontos.. sapoha eh meu orgulho.' % (sender, self.SCORES[I][1]))
+                    self.sendmessage(self.group, '%s acertou e já soma %i pontos.. sapoha eh meu orgulho.' % (sender, self.SCORES[I][1]))
                     if self.SCORES[I][1] == 5:
                         self.fim(sender)
                     self.mandar_questao()
@@ -535,7 +534,7 @@ class Vestibular():
                        
                 break
             
-        self.sendmessage(self.group, '%s já foi eliminado, paspalho.' % sender)
+        #self.sendmessage(self.group, '%s já foi eliminado, paspalho.' % sender)
                 
 
                 
@@ -621,17 +620,17 @@ def vestibular_questao():
     shuffle(ALTERNS)
     Letters = {0:'a',1:'b',2:'c',3:'d',4:'e'}
     
-
+    RA=0
     for A in range(len(ALTERNS)):
-        RA=0
-        if ALTERNS[A][0] in RESPOSTA[:3].lower():
+        
+        if (ALTERNS[A][0] in RESPOSTA[:3].lower()) and (RA==0):
             RA = 1
 
         ALTERNS[A] = Letters[A] + ALTERNS[A][1:]
         if RA == 1:
             print('mudando resposta de %s para %s.' % (RESPOSTA,Letters[A]))
             RESPOSTA = '['+Letters[A]+']]'
-            break
+            RA=-1
 
 
 
@@ -662,7 +661,7 @@ def vestibular_questao():
         BREAKS = []        
         for I in range(len(QUESTION[Q])):
             marker+=1
-            if marker > 42:
+            if marker > 36:
                 if (QUESTION[Q][I] == ',') or (QUESTION[Q][I] == '.'):
                    BREAKS.append(I+1)
                    marker = 0
