@@ -67,6 +67,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
         self.LASTIQ = ""
         self.MESSAGES = []
+
         
 
         #add aliases to make it user to use commands. for example you can then do:
@@ -75,6 +76,10 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.jidAliases = {
             # "NAME": "PHONE@s.whatsapp.net"
         }
+
+    def getBot(self):
+        return BOT
+
 
     def aliasToJid(self, calias):
         for alias, ajid in self.jidAliases.items():
@@ -476,7 +481,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     def onSuccess(self, entity):
         self.connected = True
         self.output("Logged in!", "Auth", prompt = False)
-        self.set_nickinfo()
         self.notifyInputThread()
 
     @ProtocolEntityCallback("failure")
@@ -530,7 +534,8 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         #read content of messages!
         if time() - message.getTimestamp() < 130:
             sender = message.getFrom()
-            BOTSAYS = BOT.read_output(messageOut.encode('latin-1').decode(), sender)
+            participant = message.getParticipant(False)
+            BOTSAYS = BOT.read_output(messageOut.encode('latin-1').decode(), sender, participant)
             if BOTSAYS != None:
                 if type(BOTSAYS) == list:
                     self.group_kick(sender, self.normalizeJid(message.getParticipant(False)))
@@ -622,14 +627,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         # write to file example:
         #resultGetPictureIqProtocolEntiy.writeToFile("/tmp/yowpics/%s_%s.jpg" % (getPictureIqProtocolEntity.getTo(), "preview" if resultGetPictureIqProtocolEntiy.isPreview() else "full"))
         pass
-
-    def set_nickinfo(self):
-        self.presence_name('adolfo_gomes')
-        #sleep(2)
-        self.profile_setStatus("A historia dos grandes acontecimentos do mundo nao e mais do que a historia dos seus crimes. - Voltaire")
-
-
-
 
 
     def __str__(self):
