@@ -24,6 +24,7 @@ from yowsup import env
 import datetime
 
 from tkinter import *
+from tkinter import filedialog
 
 from threading import * 
 from time import *
@@ -39,6 +40,11 @@ from d_bot import *
 
 #phone=*************
 #password=***************
+
+
+input('go')
+
+
 
 def retrieve_credentials():
     if os.path.isfile('CREDENTIALS'):
@@ -324,7 +330,7 @@ class window(Thread):
         self.editprofile.OK = Button(self.editprofile, text="save", command = lambda: self.edit_profileSAVEQUIT(attribute)).grid(column=0,row=1)
 
         if 'image' in attribute:
-            self.editprofile.BROWSE = Button(self.editprofile, text='Browse', command = self.browsefiles).grid(column=1,row=1)
+            self.editprofile.BROWSE = Button(self.editprofile, text='Browse', command = self.browsefiles).grid(column=1,row=0)
 
         self.editprofile.wm_title('edit %s' % attribute)
 
@@ -334,8 +340,7 @@ class window(Thread):
 
     def browsefiles(self):
         self.editprofile.TEXT.delete('1.0', END)                                    
-        self.editprofile.TEXT.insert('1.0', filedialog.askopenfilename())
-
+        self.editprofile.TEXT.insert('1.0', filedialog.askopenfilename(title = "escolha a imagem.",))
 
 
 
