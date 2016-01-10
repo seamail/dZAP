@@ -8,12 +8,15 @@ YOWSUP:  https://github.com/tgalal/yowsup
 
 ## Run:
 
-Extract all and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).
+Extract all and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by rooting and hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).
 
 
 ## TIP:
 
  If you invite anyone who's not in your contact list to a group, you will get banned from whatsapp's network for 24h. They will know you are using a non-official client, so they ban, because this action is not possible on the original app. *you will get banned on the second event of this nature.
  Probably other suspicious actions like massively broadcasting a message will also result in ban.
- Recurring bans may result in permanent ban for your phone number, creating a new account on it will not be possible.
- Remember Whatsapp can refine it's unnoficial client detection mechanisms at any moment, and you may be permanently banned just by sucessfully logging in on this tool. And remember that this software comes with no warranty.
+ Recurring bans may result in permanent ban for your phone number, so creating a new account on it will not be possible.
+ Remember Whatsapp can refine it's unnoficial client detection mechanisms at any moment, and you may be permanently banned just by sucessfully logging in on this tool, and remember that this software comes with no warranty.
+
+# Future:
+ I hope to be able to put this script into a single executable file, as to be used by a more general public. Trying to do this through pyinstall is failing for me, so if anyone can create a good hook for yowsup module in pyinstall, I'd be glad.
