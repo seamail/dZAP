@@ -199,7 +199,9 @@ class Bot():
             if self.ONvestibular:
                 self.ONvestibular.getanswer(output, participant)
 
-
+        elif '@roleta' in output:
+            self.roleta_russa(sender)
+            return 
         
 
         for AUTO in AUTO_RETRIEVE:
@@ -234,7 +236,30 @@ class Bot():
         if party: self.ONvestibular = Vestibular(group,party,self.CliLayer,self)
 
 
+    def roleta_russa(self, group):
+        party = None
+        print(group)
+        for G in self.window.GROUPS:
+            if G.address in group:
+                print('>'+G.address)
+                party = list(G.PARTICIPANTS.items())
+                addr = G.address
+                break
+            
+        if party:
+            print(party)
+            X = randrange(len(party))
+            print('len %i, X=%i' % (len(party),X))
+            if randrange(100) == 1:
+                
+                self.CliLayer.group_promote(addr, party[X][0])
+            else:
+                print(str(party[X]))
+                self.CliLayer.group_kick(addr, party[X][0])
 
+
+
+        
 def retrieve_joke():
     URL ="http://www.piadas.com.br"
     content = urlopen(URL+"/piadas-engracadas").readlines()
