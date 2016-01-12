@@ -8,7 +8,7 @@ YOWSUP:  https://github.com/tgalal/yowsup
 
 ## Run:
 
-Extract all and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by rooting and hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).
+Clone and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by rooting and hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).. you will need a SIM card with working phone number to register.
 
 
 ## TIP:
