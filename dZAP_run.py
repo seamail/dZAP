@@ -280,7 +280,8 @@ class window(Thread):
         self.GROUP.add_command(label="SET GROUP IMAGE", command = lambda: self.edit_profile('group image'))
         self.GROUP.add_separator()
         self.GROUP.add_command(label="BAN")
-        self.GROUP.add_command(label="demote ALL", command = self.demote_all)
+        self.GROUP.add_command(label="demote ALL", command = lambda: self.admin_toall(0))
+        self.GROUP.add_command(label="promote ALL", command = lambda: self.admin_toall(1))
 
         self.FILES = Menu(self.menubar)
         self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.GROUPS[self.highlighted_group()].address, self.TEXTIN.get('1.0',END)[:-1]))
@@ -420,7 +421,7 @@ class window(Thread):
     def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function.
         try:
             if INFO.getType() == 'result':
-                GROUPS = []
+                self.GROUPS = []
                 I=0
                 for G in INFO.groupsList:
               
@@ -447,16 +448,19 @@ class window(Thread):
             return H[0]
 
 
-    def demote_all(self):#demote all admins on a group, but yourself.
+    def admin_toall(self, demotepromote):#demote all admins on a group, but yourself.
         group = self.highlighted_group()
-
+        print(group)
         if group:
             party = group.PARTICIPANTS.items()
             for person in party:
-                if person[1] == 'admin':
-                    if CREDENTIALS[0] not in person[0]:
-                        self.YOWCLI.group_demote(group.address, person[0])
-            
+                if CREDENTIALS[0] not in person[0]:
+                    if demotepromote:
+                        if person[1] != 'admin':
+                            self.YOWCLI.group_promote(group.address, person[0])  
+                    else:
+                        if person[1] == 'admin':
+                            self.YOWCLI.group_demote(group.address, person[0])
     
 
 if __name__==  "__main__":
