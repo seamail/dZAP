@@ -188,9 +188,7 @@ class window(Thread):
 
         self.SHOWNMESSAGE = []
 
-                                     
-    def getinfo(self):
-        self.YOWCLI.group_info(self.address)
+                                  
 
     
     def callback(self):
@@ -270,7 +268,7 @@ class window(Thread):
         self.AUTOMATE.add_command(label ="@dict", command = lambda: self.sendtext(event='@dict'))
         self.AUTOMATE.add_command(label ="@indict", command = lambda: self.sendtext(event='@indict'))
         self.AUTOMATE.add_command(label ="@wiki", command = lambda: self.sendtext(event='@wiki'))
-        self.AUTOMATE.add_command(label ='Vestibular', command = lambda: BOT.govestibular(self.GROUPS[self.hilighted_group()].address))
+        self.AUTOMATE.add_command(label ='Vestibular', command = lambda: BOT.govestibular(self.GROUPS[self.highlighted_group()].address))
 
         self.PROFILE = Menu(self.menubar)
         self.PROFILE.add_command(label="SET NICK", command = lambda: self.edit_profile('nick'))
@@ -282,9 +280,10 @@ class window(Thread):
         self.GROUP.add_command(label="SET GROUP IMAGE", command = lambda: self.edit_profile('group image'))
         self.GROUP.add_separator()
         self.GROUP.add_command(label="BAN")
+        self.GROUP.add_command(label="demote ALL", command = self.demote_all)
 
         self.FILES = Menu(self.menubar)
-        self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.GROUPS[self.hilighted_group()].address, self.TEXTIN.get('1.0',END)[:-1]))
+        self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.GROUPS[self.highlighted_group()].address, self.TEXTIN.get('1.0',END)[:-1]))
 
         
         self.menubar.add_cascade(label = "PROFILE", menu = self.PROFILE)
@@ -347,7 +346,7 @@ class window(Thread):
     
 
 
-    def browsefiles(self, target):
+    def browsefiles(self, target):#open the file finder dialog.
         target.delete('1.0', END)                                    
         target.insert('1.0', filedialog.askopenfilename(title = "escolha a imagem.",))
 
@@ -362,7 +361,7 @@ class window(Thread):
             self.MSGREADINDEX+=1
 
 
-    def send_voice(self):
+    def send_voice(self):#convert text input to synthetized voice, and send the file.
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
                 create_voice(self.TEXTIN.get("1.0",END))
@@ -373,7 +372,7 @@ class window(Thread):
         self.TEXTIN.delete(1.0, END)        
 
 
-    def showmessage(self, message):
+    def showmessage(self, message):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
 
         try:
@@ -413,12 +412,12 @@ class window(Thread):
 
 
         
-    def getinfo(self):  
+    def getinfo(self):#send group info request.  
         stack.getLayer(6).groups_list()
         sleep(2)
         self.process(stack.getLayer(6).LASTIQ)
         
-    def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function
+    def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function.
         try:
             if INFO.getType() == 'result':
                 GROUPS = []
@@ -438,16 +437,26 @@ class window(Thread):
                 pass
 
 
-    def hilighted_group(self):
+    def highlighted_group(self):#return the group that is selected on the GUI, if there is exactly one.
         H=[]
         for G in range(len(self.GROUPS)):
             if self.GROUPS[G].ACTIVE == 1:
-                H.append(G)
+                H.append(self.GROUPS[G])
 
         if len(H) == 1:
             return H[0]
 
 
+    def demote_all(self):#demote all admins on a group, but yourself.
+        group = self.highlighted_group()
+
+        if group:
+            party = group.PARTICIPANTS.items()
+            for person in party:
+                if person[1] == 'admin':
+                    if CREDENTIALS[0] not in person[0]:
+                        self.YOWCLI.group_demote(group.address, person[0])
+            
     
 
 if __name__==  "__main__":
