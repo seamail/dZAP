@@ -107,7 +107,9 @@ class displayed_message(Frame):
 
 
         self.F_=Label(master=self, text=FROM)
-        self.F_.grid(column = 1, row = 0)
+        self.F_.grid(column = 2, row = 0)
+        self.S_=Label(master=self, text= " ||| ")
+        self.S_.grid(column = 1, row = 0)
         self.D_=Label(master=self,text=DATE)
         self.D_.grid(column = 0, row = 0, sticky=W)
 
@@ -196,7 +198,7 @@ class window(Thread):
 
     def sendtext(self,event=None):
         self.refresh_message()
-        sent=0
+        sent=[]
         CONTENT = self.TEXTIN.get("1.0",END)[:-1]
 
         for AUTO in AUTO_RETRIEVE:
@@ -209,11 +211,11 @@ class window(Thread):
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
                 MSG = self.YOWCLI.message_send(GROUP.address, CONTENT)    
-                sent=1       
+                sent.append(GROUP.address)       
         
         self.TEXTIN.delete(1.0, END)
-        if sent:
-            self.showmessage(MSG)
+        if len(sent) > 0:
+            self.showmessage(MSG, TO = ">>> %s" % sent)
 
         
     def run(self):#this function is started on __init___, because the window is a Thread. Initialize GUI and its widgets and menus.
@@ -373,7 +375,7 @@ class window(Thread):
         self.TEXTIN.delete(1.0, END)        
 
 
-    def showmessage(self, message):#refresh message viewing visor.
+    def showmessage(self, message, TO = None):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
 
         try:
@@ -388,7 +390,7 @@ class window(Thread):
 
         
         if not message.getFrom():
-            FROM = 'SELF >>'
+            FROM = TO
 
         else:
             FROM = message.getFrom()
@@ -418,11 +420,22 @@ class window(Thread):
         sleep(2)
         self.process(stack.getLayer(6).LASTIQ)
         
-    def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function.
+    def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function, to load the GUI with the appropriate buttons.
+        #also appends any contact you got on CONTACTS file, so the contacts and groups will appear on the same list on the app.
         try:
             if INFO.getType() == 'result':
                 self.GROUPS = []
                 I=0
+
+                contacts = open('CONTACTS','r').readlines()
+
+                for line in contacts:
+                    if len(line) > 3:
+                        person = line[:-1].split(';')
+                        self.GROUPS.append(self.group(person[1], [], person[0], I, self.root))
+                        I+=1
+
+                
                 for G in INFO.groupsList:
               
 
