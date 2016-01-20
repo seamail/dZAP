@@ -68,7 +68,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.LASTIQ = ""
         self.MESSAGES = []
 
-        
+
 
         #add aliases to make it user to use commands. for example you can then do:
         # /message send foobar "HI"
@@ -127,7 +127,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     def assertConnected(self):
         if self.connected:
-            
+
             return True
         else:
             self.output("Not connected", tag = "Error", prompt = False)
@@ -463,7 +463,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     def onIq(self, entity):
 
         print(entity)
-        self.LASTIQ = entity       
+        self.LASTIQ = entity
 
     @ProtocolEntityCallback("receipt")
     def onReceipt(self, entity):
@@ -491,7 +491,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     @ProtocolEntityCallback("notification")
     def onNotification(self, notification):
         notificationData = notification.__str__()
-        
+
         if notificationData:
             self.output(notificationData, tag = "Notification")
         else:
@@ -504,13 +504,13 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         messageOut = ""
         formattedDate = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
-        
+
         if message.getType() == "text":
             try:
                 message.getBody().encode('utf-8')
             except UnicodeEncodeError:
                 return
-            
+
             self.MESSAGES.append(message)
             #self.output(message.getBody(), tag = "%s [%s]"%(message.getFrom(), formattedDate))
             messageOut = self.getTextMessageBody(message)
@@ -521,7 +521,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             print(messageOut.toProtocolTreeNode())
 
 
-        
+
         sender = message.getFrom() if not message.isGroupMessage() else "%s/%s" % (message.getParticipant(False), message.getFrom())
         output = self.__class__.MESSAGE_FORMAT.format(
             FROM = sender,
@@ -530,7 +530,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             MESSAGE_ID = message.getId()
             )
 
-        
+
         #read content of messages!
         if time() - message.getTimestamp() < 130:
             sender = message.getFrom()
@@ -547,12 +547,12 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
                 elif BOTSAYS[-3:] == 'wav':
                     self.audio_send(message.getFrom(), BOTSAYS)
-                else:    
+                else:
                     self.message_send(message.getFrom(), BOTSAYS)
-                
+
 
         #end message custom functionality.
-        
+
         self.output(output, tag = None, prompt = not self.sendReceipts)
 
         if self.sendReceipts:
@@ -568,7 +568,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             return self.getDownloadableMediaMessageBody(message)
         else:
             return "[Media Type: %s]" % message.getMediaType()
-       
+
 
     def getDownloadableMediaMessageBody(self, message):
          return "[Media Type:{media_type}, Size:{media_size}, URL:{media_url}]".format(
@@ -635,5 +635,5 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     @clicmd("Print this message")
     def help(self):
         self.print_usage()
-    
+
 
