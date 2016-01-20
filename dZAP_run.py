@@ -1,9 +1,9 @@
+import os
 from threading import *
 from time import *
 import datetime
-import re
 
-from tkinter import filedialog
+from tkinter import *
 from yowsup import env
 from yowsup.common import YowConstants
 from yowsup.layers import YowLayerEvent
@@ -24,10 +24,6 @@ from yowsup.layers.protocol_notifications import YowNotificationsProtocolLayer
 from yowsup.layers.protocol_presence import YowPresenceProtocolLayer
 from yowsup.layers.protocol_profiles import YowProfilesProtocolLayer
 from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
-
-#this imports the BOT script with it's functions. A lot of them are called here.
-from d_bot import *
-
 
 #small dispositive to help me strace this shit. disposable..
 input('go')
@@ -90,9 +86,9 @@ class auth_window():
 
 #class for messages to be displayed on the GUI window.
 class displayed_message(Frame):
+
     def __init__(self, FROM, DATE, text_content,master=None):
         Frame.__init__(self, master=master, height = 50)
-
 
         self.F_=Label(master=self, text=FROM)
         self.F_.grid(column = 2, row = 0)
@@ -422,4 +418,3 @@ if __name__==  "__main__":
     app = window()
     BOT.window = app
     stack.loop()
-

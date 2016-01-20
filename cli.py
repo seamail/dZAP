@@ -8,16 +8,21 @@ try:
 except ImportError:
     import pyreadline as readline
 
+
 class clicmd(object):
+
     def __init__(self, desc, order = 0):
         self.desc = desc
         self.order = order
+
     def __call__(self, fn):
         fn.clidesc = self.desc
         fn.cliorder = self.order
         return fn
 
+
 class Cli(object):
+
     def __init__(self):
         self.sentCache = {}
         self.commands = {}
@@ -41,7 +46,6 @@ class Cli(object):
                     cmd = fname
                     subcommand = "_"
 
-
                 if not cmd in self.commands:
                     self.commands[cmd] = {}
 
@@ -52,11 +56,10 @@ class Cli(object):
                    "fn": fn,
                    "order": fn.cliorder
                 }
+
         #self.cv = threading.Condition()
         self.inputThread = threading.Thread(target = self.startInputThread)
         self.inputThread.daemon = True
-
-    
 
     def queueCmd(self, cmd):
         self._queuedCmds.append(cmd)
@@ -67,7 +70,7 @@ class Cli(object):
     ################### cmd input parsing ####################
     def print_usage(self):
         line_width = 100
-        
+
         outArr = []
 
         def addToOut(ind, cmd):
@@ -140,7 +143,6 @@ class Cli(object):
     def doExecCmd(self, fn):
         return fn()
 
-
     def startInputThread(self):
         #cv.acquire()
         # Fix Python 2.x.
@@ -149,7 +151,6 @@ class Cli(object):
         except NameError: pass
 
         while(True):
-
             cmd = self._queuedCmds.pop(0) if len(self._queuedCmds) else input(self.getPrompt()).strip()
             wait = self.execCmd(cmd)
             if wait:
@@ -171,7 +172,6 @@ class Cli(object):
         if self.acceptingInput == True and self.lastPrompt is True:
             print("")
 
-
         self.lastPrompt = prompt
 
         if tag is not None:
@@ -192,6 +192,7 @@ class Cli(object):
 
     def notifyInputThread(self):
         self.blockingQueue.put(1)
+
 
 if __name__ == "__main__":
     c = Cli()

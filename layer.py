@@ -1,32 +1,30 @@
-from cli import Cli, clicmd
-from yowsup.layers.interface import YowInterfaceLayer, ProtocolEntityCallback
-from yowsup.layers.auth import YowAuthenticationProtocolLayer
-from yowsup.layers import YowLayerEvent
-from yowsup.layers.network import YowNetworkLayer
-import sys
-from yowsup.common import YowConstants
 import datetime
-import os
 import logging
-from yowsup.layers.protocol_receipts.protocolentities    import *
-from yowsup.layers.protocol_groups.protocolentities      import *
-from yowsup.layers.protocol_presence.protocolentities    import *
-from yowsup.layers.protocol_messages.protocolentities    import *
-from yowsup.layers.protocol_acks.protocolentities        import *
-from yowsup.layers.protocol_ib.protocolentities          import *
-from yowsup.layers.protocol_iq.protocolentities          import *
-from yowsup.layers.protocol_contacts.protocolentities    import *
-from yowsup.layers.protocol_chatstate.protocolentities   import *
-from yowsup.layers.protocol_privacy.protocolentities     import *
-from yowsup.layers.protocol_media.protocolentities       import *
-from yowsup.layers.protocol_media.mediauploader import MediaUploader
-from yowsup.layers.protocol_profiles.protocolentities    import *
+import os
+import sys
+
+from yowsup.common import YowConstants
 from yowsup.common.tools import ModuleTools
+from yowsup.layers import YowLayerEvent
+from yowsup.layers.auth import YowAuthenticationProtocolLayer
+from yowsup.layers.interface import YowInterfaceLayer, ProtocolEntityCallback
+from yowsup.layers.network import YowNetworkLayer
+from yowsup.layers.protocol_acks.protocolentities import *
+from yowsup.layers.protocol_chatstate.protocolentities import *
+from yowsup.layers.protocol_contacts.protocolentities import *
+from yowsup.layers.protocol_groups.protocolentities import *
+from yowsup.layers.protocol_ib.protocolentities import *
+from yowsup.layers.protocol_iq.protocolentities import *
+from yowsup.layers.protocol_media.mediauploader import MediaUploader
+from yowsup.layers.protocol_media.protocolentities import *
+from yowsup.layers.protocol_messages.protocolentities import *
+from yowsup.layers.protocol_presence.protocolentities import *
+from yowsup.layers.protocol_privacy.protocolentities import *
+from yowsup.layers.protocol_profiles.protocolentities import *
+from yowsup.layers.protocol_receipts.protocolentities import *
 
-from yowsup.layers                             import YowParallelLayer
-
-from d_bot import *
-
+from cli import Cli, clicmd
+from bot.core import Bot
 
 
 BOT = Bot()
@@ -35,25 +33,20 @@ BOT = Bot()
 logger = logging.getLogger(__name__)
 
 
-
-
-
-
 class YowsupCliLayer(Cli, YowInterfaceLayer):
-    PROP_RECEIPT_AUTO       = "org.openwhatsapp.yowsup.prop.cli.autoreceipt"
-    PROP_RECEIPT_KEEPALIVE  = "org.openwhatsapp.yowsup.prop.cli.keepalive"
-    PROP_CONTACT_JID        = "org.openwhatsapp.yowsup.prop.cli.contact.jid"
-    EVENT_LOGIN             = "org.openwhatsapp.yowsup.event.cli.login"
-    EVENT_START             = "org.openwhatsapp.yowsup.event.cli.start"
-    EVENT_SENDANDEXIT       = "org.openwhatsapp.yowsup.event.cli.sendandexit"
+    PROP_RECEIPT_AUTO = "org.openwhatsapp.yowsup.prop.cli.autoreceipt"
+    PROP_RECEIPT_KEEPALIVE = "org.openwhatsapp.yowsup.prop.cli.keepalive"
+    PROP_CONTACT_JID = "org.openwhatsapp.yowsup.prop.cli.contact.jid"
+    EVENT_LOGIN = "org.openwhatsapp.yowsup.event.cli.login"
+    EVENT_START = "org.openwhatsapp.yowsup.event.cli.start"
+    EVENT_SENDANDEXIT = "org.openwhatsapp.yowsup.event.cli.sendandexit"
 
-    MESSAGE_FORMAT          = "[{FROM}({TIME})]:[{MESSAGE_ID}]\t {MESSAGE}"
+    MESSAGE_FORMAT = "[{FROM}({TIME})]:[{MESSAGE_ID}]\t {MESSAGE}"
 
     DISCONNECT_ACTION_PROMPT = 0
     DISCONNECT_ACTION_EXIT   = 1
 
     ACCOUNT_DEL_WARNINGS = 4
-
 
     def __init__(self):
         super(YowsupCliLayer, self).__init__()
@@ -68,8 +61,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.LASTIQ = ""
         self.MESSAGES = []
 
-
-
         #add aliases to make it user to use commands. for example you can then do:
         # /message send foobar "HI"
         # and then it will get automaticlaly mapped to foobar's jid
@@ -80,12 +71,10 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     def getBot(self):
         return BOT
 
-
     def aliasToJid(self, calias):
         for alias, ajid in self.jidAliases.items():
             if calias.lower() == alias.lower():
                 return self.normalizeJid(ajid)
-
         return self.normalizeJid(calias)
 
     def jidToAlias(self, jid):
@@ -108,14 +97,12 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     def onEvent(self, layerEvent):
         if layerEvent.getName() == self.__class__.EVENT_START:
             self.startInput()
-
             return True
         elif layerEvent.getName() == self.__class__.EVENT_SENDANDEXIT:
             credentials = layerEvent.getArg("credentials")
             target = layerEvent.getArg("target")
             message = layerEvent.getArg("message")
             self.sendMessageAndDisconnect(credentials, target, message)
-
             return True
         elif layerEvent.getName() == YowNetworkLayer.EVENT_STATE_DISCONNECTED:
             self.output("Disconnected: %s" % layerEvent.getArg("reason"))
@@ -127,7 +114,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     def assertConnected(self):
         if self.connected:
-
             return True
         else:
             self.output("Not connected", tag = "Error", prompt = False)
@@ -140,7 +126,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.queueCmd("/message send %s \"%s\" wait" % (jid, message))
         self.queueCmd("/disconnect")
         self.startInput()
-
 
     ########## PRESENCE ###############
     @clicmd("Set presence name")
@@ -194,7 +179,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     @clicmd("Set status text")
     def profile_setStatus(self, text):
         if self.assertConnected():
-
             def onSuccess(resultIqEntity, originalIqEntity):
                 self.output("Status updated successfully")
 
@@ -325,7 +309,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         else:
             logger.error("Python PIL library is not installed, can't set profile picture")
 
-
     @clicmd("Get group info")
     def group_info(self, group_jid):
         if self.assertConnected():
@@ -362,7 +345,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.toLower(props)
         crypto = CryptoIqProtocolEntity()
         self.toLower(crypto)
-
 
     @clicmd("Delete your account")
     def account_delete(self):
@@ -437,7 +419,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     @clicmd("Disconnect")
     def disconnect(self):
         if self.assertConnected():
-
             self.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_DISCONNECT))
 
     @clicmd("Quick login")
@@ -504,7 +485,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         messageOut = ""
         formattedDate = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
-
         if message.getType() == "text":
             try:
                 message.getBody().encode('utf-8')
@@ -520,8 +500,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             messageOut = "Unknown message type %s " % message.getType()
             print(messageOut.toProtocolTreeNode())
 
-
-
         sender = message.getFrom() if not message.isGroupMessage() else "%s/%s" % (message.getParticipant(False), message.getFrom())
         output = self.__class__.MESSAGE_FORMAT.format(
             FROM = sender,
@@ -529,7 +507,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             MESSAGE = messageOut.encode('latin-1').decode() if sys.version_info >= (3, 0) else messageOut,
             MESSAGE_ID = message.getId()
             )
-
 
         #read content of messages!
         if time() - message.getTimestamp() < 130:
@@ -550,7 +527,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
                 else:
                     self.message_send(message.getFrom(), BOTSAYS)
 
-
         #end message custom functionality.
 
         self.output(output, tag = None, prompt = not self.sendReceipts)
@@ -558,7 +534,6 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         if self.sendReceipts:
             self.toLower(message.ack())
             self.output("Sent delivered receipt", tag = "Message %s" % message.getId())
-
 
     def getTextMessageBody(self, message):
         return message.getBody()
@@ -569,14 +544,12 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         else:
             return "[Media Type: %s]" % message.getMediaType()
 
-
     def getDownloadableMediaMessageBody(self, message):
          return "[Media Type:{media_type}, Size:{media_size}, URL:{media_url}]".format(
             media_type = message.getMediaType(),
             media_size = message.getMediaSize(),
             media_url = message.getMediaUrl()
             )
-
 
     def doSendImage(self, filePath, url, to, ip = None, caption = None):
         entity = ImageDownloadableMediaMessageProtocolEntity.fromFilePath(filePath, url, ip, to, caption = caption)
@@ -628,12 +601,9 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         #resultGetPictureIqProtocolEntiy.writeToFile("/tmp/yowpics/%s_%s.jpg" % (getPictureIqProtocolEntity.getTo(), "preview" if resultGetPictureIqProtocolEntiy.isPreview() else "full"))
         pass
 
-
     def __str__(self):
         return "CLI Interface Layer"
 
     @clicmd("Print this message")
     def help(self):
         self.print_usage()
-
-
