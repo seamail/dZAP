@@ -131,7 +131,16 @@ class Bot():
             else:
                 return retrieve_porn('normal')
         elif 'koeh!' in output:
-            msg = "koeh.. sou o adolfo gomes, seu novo amiguinho. Digite @kkk para rir um pouquinho ou digite @sad se voce estiver se sentindo um lixo. @nerd pra estudar uns skemas." #Se quiser sacanear seus amigo fpd, digite @xinga exemplo .. quem disser exemplo será banido (se eu for adm)."
+            msg = """koeh.. sou o adolfo gomes, seu novo amiguinho. Digite @kkk para rir um pouquinho;\n
+            @sad se voce estiver se sentindo um lixo.\n
+            @nerd pra estudar uns skemas.\n
+            @porn pra receber umas pornografias estranhas.\n
+            @nerd para obter um pedaço inútil de informação útil.\n
+            @dict [palavra] ou @indict [palavra] pra consultar um desses dois dicionários poderosos da língua portuguesa.
+            @jesus pra ouvir um pouco da palavra de DEUS.\n
+            @diz [frase] q eu te mando um áudio falando tal frase;\n
+            @enema pra se inscrever no meu vestibular lixo.\n
+            E é só isso mermo seus troxa."""
             return msg
         elif '@diz' in output:
             X = output.find('@diz')+4
