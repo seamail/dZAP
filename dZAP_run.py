@@ -13,7 +13,7 @@ from yowsup.layers.coder                       import YowCoderLayer
 from yowsup.layers.protocol_presence           import YowPresenceProtocolLayer
 from yowsup.layers.protocol_media              import YowMediaProtocolLayer
 from yowsup.layers.protocol_media.mediauploader import MediaUploader
-
+from yowsup.layers.auth                         import YowCryptLayer
 
 from yowsup.stacks import YowStack
 from yowsup.common import YowConstants
@@ -487,7 +487,7 @@ if __name__==  "__main__":
     #initialize yowsup stack, with the layers we need.
     layers = (
         YowsupCliLayer,
-        YowParallelLayer([YowAuthenticationProtocolLayer, YowMessagesProtocolLayer, YowReceiptProtocolLayer, YowAckProtocolLayer, YowGroupsProtocolLayer,
+        YowParallelLayer([YowAuthenticationProtocolLayer,YowMessagesProtocolLayer, YowReceiptProtocolLayer, YowAckProtocolLayer, YowGroupsProtocolLayer,
                           YowProfilesProtocolLayer, YowChatstateProtocolLayer, YowPresenceProtocolLayer, YowMediaProtocolLayer, YowNotificationsProtocolLayer])
     ) + YOWSUP_CORE_LAYERS
 
@@ -496,7 +496,8 @@ if __name__==  "__main__":
     stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])    #whatsapp server address
     stack.setProp(YowCoderLayer.PROP_DOMAIN, YowConstants.DOMAIN)
     stack.setProp(YowCoderLayer.PROP_RESOURCE, env.CURRENT_ENV.getResource())          #info about us as WhatsApp client
-
+    #stack.setProp(YowCryptLayer.PROP)
+                  
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
 
 
