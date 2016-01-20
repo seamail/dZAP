@@ -1,48 +1,36 @@
-from layer import YowsupCliLayer
-from yowsup.layers                             import YowParallelLayer
-from yowsup.layers.auth                        import YowAuthenticationProtocolLayer
-from yowsup.layers.protocol_messages           import YowMessagesProtocolLayer
-from yowsup.layers.protocol_receipts           import YowReceiptProtocolLayer
-from yowsup.layers.protocol_acks               import YowAckProtocolLayer
-from yowsup.layers.protocol_groups             import YowGroupsProtocolLayer
-from yowsup.layers.protocol_profiles           import YowProfilesProtocolLayer
-from yowsup.layers.protocol_chatstate          import YowChatstateProtocolLayer
-from yowsup.layers.protocol_notifications      import YowNotificationsProtocolLayer
-from yowsup.layers.network                     import YowNetworkLayer
-from yowsup.layers.coder                       import YowCoderLayer
-from yowsup.layers.protocol_presence           import YowPresenceProtocolLayer
-from yowsup.layers.protocol_media              import YowMediaProtocolLayer
-from yowsup.layers.protocol_media.mediauploader import MediaUploader
-from yowsup.layers.auth                         import YowCryptLayer
-
-from yowsup.stacks import YowStack
-from yowsup.common import YowConstants
-from yowsup.layers import YowLayerEvent
-from yowsup.stacks import YowStack, YOWSUP_CORE_LAYERS
-from yowsup import env
-
-import datetime
-
-from tkinter import *
-from tkinter import filedialog
-
 from threading import *
 from time import *
-
+import datetime
 import re
 
+from tkinter import filedialog
+from yowsup import env
+from yowsup.common import YowConstants
+from yowsup.layers import YowLayerEvent
+from yowsup.stacks import YOWSUP_CORE_LAYERS
+from yowsup.stacks import YowStack
+
+from layer import YowsupCliLayer
+from yowsup.layers import YowParallelLayer
+from yowsup.layers.auth import YowAuthenticationProtocolLayer
+from yowsup.layers.coder import YowCoderLayer
+from yowsup.layers.network import YowNetworkLayer
+from yowsup.layers.protocol_acks import YowAckProtocolLayer
+from yowsup.layers.protocol_chatstate import YowChatstateProtocolLayer
+from yowsup.layers.protocol_groups import YowGroupsProtocolLayer
+from yowsup.layers.protocol_media import YowMediaProtocolLayer
+from yowsup.layers.protocol_messages import YowMessagesProtocolLayer
+from yowsup.layers.protocol_notifications import YowNotificationsProtocolLayer
+from yowsup.layers.protocol_presence import YowPresenceProtocolLayer
+from yowsup.layers.protocol_profiles import YowProfilesProtocolLayer
+from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
 
 #this imports the BOT script with it's functions. A lot of them are called here.
 from d_bot import *
 
 
-
-
-
-
 #small dispositive to help me strace this shit. disposable..
 input('go')
-
 
 #function to load credentials from the CREDENTIALS file in the same folder as this script.. template:
 
@@ -126,7 +114,6 @@ class window(Thread):
             self.address = address
             self.subject = subject
 
-
             self.label = Label(master)
             self.label['text'] = self.subject
             self.label.grid(column=0, row=index+2)
@@ -138,7 +125,6 @@ class window(Thread):
             self.ACT['background'] = 'black'
             self.ACT.grid(column=1, row=index+2)
 
-
             self.ACTIVE = 0
 
             self.PARTICIPANTS = party
@@ -148,7 +134,6 @@ class window(Thread):
                 self.ACTIVE = 0
                 self.ACT['background'] = 'black'
                 self.ACT['activebackground'] = 'dim grey'
-
             else:
                 self.ACTIVE = 1
                 self.ACT['background'] = 'olive drab'
@@ -159,19 +144,12 @@ class window(Thread):
             self.trigger = triggerTXT
             self.action = action
 
-
-
     def automate_window(self):
         self.auto_window = Tk()
-
         self.auto_window.VIEW = Canvas(self.auto_window).grid(row=0,column=0)
-
         self.auto_window.OK = Button(self.auto_window, text="save & close").grid(row=1,column=0)
-
-
         self.auto_window.wm_title(self.NAME + " [manage automation]")
         self.auto_window.mainloop()
-
 
     def __init__(self):
         Thread.__init__(self)
@@ -190,9 +168,6 @@ class window(Thread):
 
         self.SHOWNMESSAGE = []
 
-
-
-
     def callback(self):
         self.root.quit()
 
@@ -206,8 +181,6 @@ class window(Thread):
                 print('>>>>'+CONTENT)
                 CONTENT = AUTO.retrieve(CONTENT)
 
-
-
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
                 MSG = self.YOWCLI.message_send(GROUP.address, CONTENT)
@@ -217,14 +190,10 @@ class window(Thread):
         if len(sent) > 0:
             self.showmessage(MSG, TO = ">>> %s" % sent)
 
-
     def run(self):#this function is started on __init___, because the window is a Thread. Initialize GUI and its widgets and menus.
         self.root = Tk()
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
         self.root.resizable(width=FALSE, height=FALSE)
-
-
-
 
         self.VISOR = Frame(self.root, height = 600, width=500)
         self.VISOR.grid(column=0,row=0,columnspan=4)
@@ -233,34 +202,20 @@ class window(Thread):
             self.SHOWNMESSAGE.append(displayed_message(" ", " ", " ", master=self.VISOR))
             self.SHOWNMESSAGE[I].grid(column=0, row=I)'''
 
-
         self.TEXTIN = Text(self.root, height=2, width=73)
         self.TEXTIN.grid(column=0,row=1,columnspan=4, sticky=W+E)
-
-        #self.root.bind('<Return>', self.sendtext())  >>>method for sending text message by hitting enter. <possible with two-line text input widget??>>
-
         self.SEND = Button(self.root, text = 'SEND', command = lambda: self.sendtext()).grid(column=2,row=2)
-
         self.SENDVOICE = Button(self.root, text= 'SENDVOICE', command = self.send_voice).grid(column=2,row=3)
-
-
-
         self.REFRESH = Button(self.root, text = 'REFRESH', command = self.getinfo).grid(column=3,row=4)
-
         self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
-
-
         self.ADM = Button(self.root, text = 'toADM')
         self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.GROUPS[2].address, self.TEXTIN.get("1.0",END)[:-1])
         self.ADM.grid(column=3,row=2)
-
         self.BROWSE = Button(self.root, text= 'browse file')
         self.BROWSE["command"] = lambda: self.browsefiles(self.TEXTIN)
         self.BROWSE.grid(column=2, row=4)
 
-
         self.root.wm_title(self.NAME)
-
         self.menubar = Menu(self.root)
 
         self.AUTOMATE = Menu(self.menubar)
@@ -287,24 +242,17 @@ class window(Thread):
 
         self.FILES = Menu(self.menubar)
         self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.GROUPS[self.highlighted_group()].address, self.TEXTIN.get('1.0',END)[:-1]))
-
-
         self.menubar.add_cascade(label = "PROFILE", menu = self.PROFILE)
         self.menubar.add_cascade(label = "GROUP", menu = self.GROUP)
         self.menubar.add_cascade(label = "AUTOMATE", menu = self.AUTOMATE)
         self.menubar.add_cascade(label = 'FILES', menu = self.FILES)
 
-
         self.root.config(menu=self.menubar)
-
-
-
 
         sleep(2)
         self.getinfo()
 
         self.root.mainloop()
-
 
     def edit_profileSAVEQUIT(self,attribute):
         if attribute == 'nick':
@@ -321,23 +269,13 @@ class window(Thread):
                     elif attribute == 'group image':
                         self.YOWCLI.group_picture(G.address, self.editprofile.TEXT.get('1.0',END)[:-1])
 
-
-
-
-
-
-
         self.editprofile.destroy()
 
     def edit_profile(self, attribute):
-
-
         self.editprofile = Tk()
 
         self.editprofile.TEXT = Text(self.editprofile,height=1)
         self.editprofile.TEXT.grid(column=0,row=0)
-
-
         self.editprofile.OK = Button(self.editprofile, text="save", command = lambda: self.edit_profileSAVEQUIT(attribute)).grid(column=0,row=1)
 
         if 'image' in attribute:
@@ -345,35 +283,21 @@ class window(Thread):
 
         self.editprofile.wm_title('edit %s' % attribute)
 
-
-
-
-
     def browsefiles(self, target):#open the file finder dialog.
         target.delete('1.0', END)
         target.insert('1.0', filedialog.askopenfilename(title = "escolha a imagem.",))
 
-
-
-
-
     def refresh_message(self):
-
         while self.MSGREADINDEX < len(stack.getLayer(6).MESSAGES):
             self.showmessage(stack.getLayer(6).MESSAGES[self.MSGREADINDEX])
             self.MSGREADINDEX+=1
-
 
     def send_voice(self):#convert text input to synthetized voice, and send the file.
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
                 create_voice(self.TEXTIN.get("1.0",END))
                 sleep(1)
-                MSG = self.YOWCLI.audio_send(GROUP.address, 'sound.wav')
-                sent=1
-
         self.TEXTIN.delete(1.0, END)
-
 
     def showmessage(self, message, TO = None):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
@@ -386,21 +310,14 @@ class window(Thread):
         for K in range(round(len(text_content)/60)):
             text_content = text_content[:60*K] + "\n" + text_content[60*K:]
 
-
-
-
         if not message.getFrom():
             FROM = TO
-
         else:
             FROM = message.getFrom()
 
         DATE = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
         self.SHOWNMESSAGE.append(displayed_message(FROM, DATE, text_content, master=self.VISOR))
-
-
-
 
         if len(self.SHOWNMESSAGE) > 10:
             self.SHOWNMESSAGE.pop(0)
@@ -410,10 +327,7 @@ class window(Thread):
         for M in range(len(self.SHOWNMESSAGE)):
             self.SHOWNMESSAGE[M].grid(column=0,row=M, sticky=W)
 
-
         self.MSGABSINDEX+=1
-
-
 
     def getinfo(self):#send group info request.
         stack.getLayer(6).groups_list()
@@ -435,21 +349,14 @@ class window(Thread):
                         self.GROUPS.append(self.group(person[1], [], person[0], I, self.root))
                         I+=1
 
-
                 for G in INFO.groupsList:
-
-
                     PARTY = G.getParticipants()
                     SUBJ = G.getSubject()
                     ID = G.getId()
-
                     self.GROUPS.append(self.group(ID, PARTY, SUBJ, I, self.root))
-
                     I+=1
-
         except AttributeError:
-                pass
-
+            pass
 
     def highlighted_group(self):#return the group that is selected on the GUI, if there is exactly one.
         H=[]
@@ -459,7 +366,6 @@ class window(Thread):
 
         if len(H) == 1:
             return H[0]
-
 
     def admin_toall(self, demotepromote):#demote all admins on a group, but yourself.
         group = self.highlighted_group()
@@ -482,13 +388,23 @@ if __name__==  "__main__":
         print(CREDENTIALS[0])
         auth_w = auth_window()
 
-
-
     #initialize yowsup stack, with the layers we need.
     layers = (
         YowsupCliLayer,
-        YowParallelLayer([YowAuthenticationProtocolLayer,YowMessagesProtocolLayer, YowReceiptProtocolLayer, YowAckProtocolLayer, YowGroupsProtocolLayer,
-                          YowProfilesProtocolLayer, YowChatstateProtocolLayer, YowPresenceProtocolLayer, YowMediaProtocolLayer, YowNotificationsProtocolLayer])
+        YowParallelLayer(
+            [
+                YowAuthenticationProtocolLayer,
+                YowMessagesProtocolLayer,
+                YowReceiptProtocolLayer,
+                YowAckProtocolLayer,
+                YowGroupsProtocolLayer,
+                YowProfilesProtocolLayer,
+                YowChatstateProtocolLayer,
+                YowPresenceProtocolLayer,
+                YowMediaProtocolLayer,
+                YowNotificationsProtocolLayer,
+            ]
+        )
     ) + YOWSUP_CORE_LAYERS
 
     stack = YowStack(layers)
@@ -496,17 +412,11 @@ if __name__==  "__main__":
     stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])    #whatsapp server address
     stack.setProp(YowCoderLayer.PROP_DOMAIN, YowConstants.DOMAIN)
     stack.setProp(YowCoderLayer.PROP_RESOURCE, env.CURRENT_ENV.getResource())          #info about us as WhatsApp client
-    #stack.setProp(YowCryptLayer.PROP)
-                  
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
-
-
-
 
     #setting bot and cli layer to know each other.
     BOT = stack.getLayer(6).getBot()
     BOT.getCliLayer(stack.getLayer(6))
-
 
     #starting the GUI and client; set BOT to recognize the window instance.
     app = window()
