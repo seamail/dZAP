@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import sys
+from time import *
 
 from yowsup.common import YowConstants
 from yowsup.common.tools import ModuleTools
