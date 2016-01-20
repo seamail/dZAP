@@ -25,6 +25,8 @@ from yowsup.layers.protocol_presence import YowPresenceProtocolLayer
 from yowsup.layers.protocol_profiles import YowProfilesProtocolLayer
 from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
 
+from bot.core import AUTO_RETRIEVE
+
 #small dispositive to help me strace this shit. disposable..
 input('go')
 
