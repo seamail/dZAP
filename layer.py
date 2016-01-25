@@ -25,7 +25,7 @@ from yowsup.layers.protocol_profiles.protocolentities import *
 from yowsup.layers.protocol_receipts.protocolentities import *
 
 from cli import Cli, clicmd
-from bot.core import Bot
+from bot import Bot
 
 
 BOT = Bot()

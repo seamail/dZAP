@@ -6,225 +6,12 @@ from random import *
 import re
 from time import *
 from subprocess import call
-
 import unicodedata
-
 import urllib
-from urllib.parse import quote
 
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-
-
-class Bot():
-    def __init__(self):
-        current_time = time()
-        self.timer_p = current_time - 13.0
-        self.timer_s = current_time - 13.0
-        self.timer_n = current_time - 13.0
-
-        self.rep_p = 1
-        self.rep_s = 1
-        self.rep_n = 1
-
-        self.ban_words = []
-        self.load_ban_word()
-
-        self.on_vestibular = 0
-
-        self.window = None
-
-    def load_ban_word(self):
-        if not os.path.isfile('banword.txt'):
-            return
-        ban_word_file = open('banword.txt', 'r')
-
-        for line in ban_word_file.readlines():
-            line = line.split('=')
-            if len(line) > 1:
-                if line[1][-1] == '\n':
-                    line[1] = line[1][:-1]
-                self.ban_words.append([line[0], line[1]])
-
-    def read_output(self, output, sender, participant):
-        output = output.lower()
-        current_time = time()
-
-        for BWK in self.ban_words:
-            if BWK[1] in output:
-                return ["essezin disse a palavra banida, se fodeo."]
-        if '@kkk' in output:
-            if 13.0 < float(current_time) - self.timer_p:
-                self.timer_p = current_time
-                self.rep_p = 1
-                return retrieve_joke()
-            elif self.rep_p:
-                self.rep_p = 0
-                self.timer_p = current_time
-                return "por que você não conta uma aí agora, fdp?"
-        elif ('@sad' in output) or ('@pensa' in output) or ('@love' in output):
-            if float(current_time) - self.timer_s > 13.0:
-                self._log_command('sad', True)
-
-                self.timer_s = current_time
-                self.rep_s = 1
-                kind = ['@sad', '@pensa', '@love']
-                for Ki in range(len(kind)):
-                    if kind[Ki] in output:
-                        if '!' in output:
-                            return create_voice(psicologo(Ki))
-                        else:
-                            return psicologo(Ki)
-            elif self.rep_s:
-                self._log_command('sad', False)
-
-                self.rep_s = 0
-                self.timer_s = current_time
-                return "calem essa boca, voces me contaminam com essa " \
-                       "depressão."
-        elif '@nerd' in output:
-            if float(current_time) - self.timer_n > 13.0:
-                self._log_command('nerd', True)
-
-                self.timer_n = current_time
-                self.rep_n = 1
-                return wikipedia()
-            elif self.rep_n:
-                self._log_command('nerd', False)
-
-                self.rep_n = 0
-                self.timer_n = current_time
-                return "vai pegar um livro, seu mongolão."
-        elif '@xinga ' in output:
-            x = output.find('@xinga')
-            word = output[x + 7:]
-            if " " in word:
-                word = word.split(" ")
-                word = word[0]
-
-            if len(word) > 4:
-                user_has_ban_word = 0
-
-                for bw in self.ban_words:
-                    if bw[0] == sender:
-                        bw[1] = word.lower()
-                        user_has_ban_word = 1
-
-                if user_has_ban_word == 0:
-                    self.ban_words.append([sender, word])
-
-                ban_word_file = open('banword.txt', 'w')
-                for ban_word in self.ban_words:
-                    ban_word_file.write(ban_word[0] + "=" + ban_word[1] + '\n')
-                ban_word_file.close()
-
-                return word + " agora é uma palavra banida."
-            else:
-                return word + " é uma palavra muito curta, seu fela."
-
-        elif ('@' in output) and ('porn' in output):
-            if 'ruiva' in output:
-                return retrieve_porn('ruiva')
-            elif 'soft' in output:
-                return retrieve_porn('soft')
-            elif 'sapa' in output:
-                return retrieve_porn('lesbian')
-            elif 'afro' in output:
-                return retrieve_porn('ebony')
-            else:
-                return retrieve_porn('normal')
-        elif 'koeh!' in output:
-            msg = """koeh.. sou o adolfo gomes, seu novo amiguinho. Digite @kkk para rir um pouquinho;\n
-            @sad se voce estiver se sentindo um lixo.\n
-            @nerd pra estudar uns skemas.\n
-            @porn pra receber umas pornografias estranhas.\n
-            @nerd para obter um pedaço inútil de informação útil.\n
-            @dict [palavra] ou @indict [palavra] pra consultar um desses dois dicionários poderosos da língua portuguesa.
-            @jesus pra ouvir um pouco da palavra de DEUS.\n
-            @diz [frase] q eu te mando um áudio falando tal frase;\n
-            @enema pra se inscrever no meu vestibular lixo.\n
-            E é só isso mermo seus troxa."""
-            return msg
-        elif '@diz' in output:
-            x = output.find('@diz') + 4
-            word = output[x + 5:]
-            return create_voice(word)
-        elif ('@jesus' in output) or ('@god' in output):
-            return retrieve_salmo()
-        elif '@drugs' in output:
-            pass
-        elif '@enema' in output:
-            if self.on_vestibular == 0:
-                print('going vestibular.')
-                self.govestibular(sender)
-        elif '#' in output:
-            if self.on_vestibular:
-                self.on_vestibular.getanswer(output, participant)
-        elif '@roleta' in output:
-            self.roleta_russa(sender)
-            return
-        for auto in AUTO_RETRIEVE:
-            out = auto.trigger(output)
-            if auto.trigger(output):
-                return out
-
-    def getCliLayer(self, layer):
-        self.CliLayer = layer
-
-    def sendmessage(self, to, msg):
-        self.CliLayer.message_send(to, msg)
-
-    def govestibular(self, group):
-        party = None
-        if not self.window:
-            print('no window.')
-            return
-
-        print(group)
-        for G in self.window.GROUPS:
-            print('>' + G.address)
-            if G.address in group:
-                party = G.PARTICIPANTS
-
-        if party:
-            self.on_vestibular = Vestibular(group, party, self.CliLayer, self)
-
-    def roleta_russa(self, group):
-        party = None
-        print(group)
-        for g in self.window.GROUPS:
-            if g.address in group:
-                print('>' + g.address)
-                party = list(g.PARTICIPANTS.items())
-                addr = g.address
-                break
-
-        if party:
-            print(party)
-            x = randrange(len(party))
-            print('len %i, x=%i' % (len(party), x))
-            if randrange(100) == 1:
-                self.CliLayer.group_promote(addr, party[x][0])
-            else:
-                print(str(party[x]))
-                self.CliLayer.group_kick(addr, party[x][0])
-
-    def _log_command(self, command_name, was_granted):
-        current_time = time()
-        if was_granted:
-            status_text = 'granted'
-        else:
-            status_text = 'denied'
-        print(
-            '@{} {}. current current_time is {} and buffer current_time is {}'
-                .format(
-                command_name,
-                status_text,
-                str(current_time),
-                str(self.timer_s),
-            ),
-        )
 
 
 def retrieve_joke():
@@ -297,10 +84,10 @@ def psicologo(kind):
 
 
 def wikipedia():
-    WIKIP = "https://pt.wikipedia.org/wiki/Especial:Aleat%C3%B3ria"
+    url = "https://pt.wikipedia.org/wiki/Especial:Aleat%C3%B3ria"
 
-    content = urlopen(WIKIP).read()
-    TAG_RE = re.compile(r'<[^>]+>')
+    content = urlopen(url).read()
+    tag_re = re.compile(r'<[^>]+>')
 
     z = content.find(b'<p>')
     k = content.find(b'</p>')
@@ -308,7 +95,7 @@ def wikipedia():
     paragraph = content[z + 3:k].decode("UTF-8")
     print(paragraph)
 
-    paragraph = TAG_RE.sub('', paragraph)
+    paragraph = tag_re.sub('', paragraph)
 
     if len(paragraph) < 8:
         return wikipedia()
@@ -327,42 +114,42 @@ def retrieve_porn(category):
         'ebony': '/ebony/',
     }
 
-    porn_src = url + categories[category]
+    url = url + categories[category]
 
-    content = urlopen(porn_src).read().decode("UTF-8")
+    content = urlopen(url).read().decode("UTF-8")
 
     if os.path.isfile('USEDporn'):
         used = open('USEDporn', 'r').read()
     else:
         used = ''
 
-    photosarray = [
+    photos_array = [
         m.start() for m in re.finditer('http://content.pornpics.com', content)
         ]
 
-    picurl = ""
+    pic_url = ""
     x = 0
-    while picurl in used:
-        number = randrange(len(photosarray))
-        z = photosarray[number]
+    while pic_url in used:
+        number = randrange(len(photos_array))
+        z = photos_array[number]
 
-        picurl = content[z:z + 120]
+        pic_url = content[z:z + 120]
 
-        k = picurl.find('.jpg') + 4
+        k = pic_url.find('.jpg') + 4
 
-        picurl = picurl[:k]
+        pic_url = pic_url[:k]
 
         filename = 'porncache.jpg'
 
-        print('>>>>' + picurl)
+        print('>>>>' + pic_url)
         x += 1
         if x > 30:
             return
 
     used = open('USEDporn', 'a+')
 
-    used.write(picurl + '\n')
-    file_ = urlopen(picurl)
+    used.write(pic_url + '\n')
+    file_ = urlopen(pic_url)
     fo = open(filename, 'wb')
     fo.write(file_.read())
     fo.close()
@@ -371,7 +158,7 @@ def retrieve_porn(category):
 
 
 def create_voice(text):
-    FILEPATH = 'sound.wav'
+    filepath = 'sound.wav'
 
     text = text.replace('ç', 'ss').replace('á', 'ah')[:-1]
     text = ''.join(c for c in unicodedata.normalize('NFD', text) if
@@ -380,18 +167,18 @@ def create_voice(text):
 
     print('>>>>>>>>' + text)
 
-    e = 'echo "' + text + '" | espeak -v brazil -w "' + FILEPATH + '"'
+    e = 'echo "' + text + '" | espeak -v brazil -w "' + filepath + '"'
     call(e, shell=True)
     sleep(3)
 
-    return FILEPATH
+    return filepath
 
 
 def retrieve_salmo():
     index = randrange(1, 150)
-    src = 'http://salmos.a77.com.br/salmos/salmo_%i.php' % index
+    url = 'http://salmos.a77.com.br/salmos/salmo_%i.php' % index
 
-    page = urlopen(src).read()
+    page = urlopen(url).read()
 
     z = page.find(b'<img src="salmo-da-biblia-sagrada.gif"')
 
@@ -492,9 +279,9 @@ class Vestibular():
             )
         self.bot.ONvestibular = 0
 
-    def sendpic(self, picurl):
+    def sendpic(self, pic_url):
         filename = 'questioncache.jpg'
-        file_ = urlopen(picurl)
+        file_ = urlopen(pic_url)
         fo = open(filename, 'wb')
         fo.write(file_.read())
         fo.close()
@@ -516,7 +303,7 @@ def vestibular_questao():
 
     source = urlopen(url).read().decode('latin-1', 'ignore')
 
-    questions = [m.start() for m in re.finditer('pergunta:', source)]
+    questions = [m.start() for m in re.finditer('question:', source)]
 
     z = questions[randrange(len(questions))]
     z += 9
@@ -539,18 +326,18 @@ def vestibular_questao():
         except urllib.error.URLError:
             return vestibular_questao()
 
-    pergunta = re.compile(r'<[^>]+>').sub('', source[z:k].replace('<br>', '\n'))
+    question = re.compile(r'<[^>]+>').sub('', source[z:k].replace('<br>', '\n'))
 
-    if pergunta.find('e)') == -1: return vestibular_questao()
+    if question.find('e)') == -1: return vestibular_questao()
 
     alterns = []
-    alterns.append(pergunta[pergunta.find('a)'):pergunta.find('b)')])
-    alterns.append(pergunta[pergunta.find('b)'):pergunta.find('c)')])
-    alterns.append(pergunta[pergunta.find('c)'):pergunta.find('d)')])
-    alterns.append(pergunta[pergunta.find('d)'):pergunta.find('e)')])
-    alterns.append(pergunta[pergunta.find('e)'):])
+    alterns.append(question[question.find('a)'):question.find('b)')])
+    alterns.append(question[question.find('b)'):question.find('c)')])
+    alterns.append(question[question.find('c)'):question.find('d)')])
+    alterns.append(question[question.find('d)'):question.find('e)')])
+    alterns.append(question[question.find('e)'):])
 
-    pergunta = pergunta[:pergunta.find('a)')]
+    question = question[:question.find('a)')]
 
     resposta = re.compile(r'<[^>]+>').sub('', source[zr:kr])
 
@@ -569,7 +356,7 @@ def vestibular_questao():
             resposta = '[' + letters[A] + ']]'
             ra = -1
 
-    question = [pergunta]
+    question = [question]
     for alt in alterns:
         question.append(alt)
     question.append(resposta)
@@ -616,100 +403,3 @@ def vestibular_questao():
 
     return ['questioncache.jpg', resposta]
 
-
-class Retrieve():
-    def __init__(
-            self,
-            callword,
-            url,
-            ftrim='',
-            btrim='',
-            frtrim='',
-            brtrim='',
-            error_key=b'koytr1we0ewrt',
-            charset='latin-1',
-    ):
-        self.url = url
-        self.trigger_word = callword
-
-        self.front_trim = ftrim
-        self.back_trim = btrim
-        self.front_rebound_trim = frtrim
-        self.back_rebound_trim = brtrim
-
-        self.charset = charset
-
-        self.error_key = error_key
-
-    def trigger(self, IN):
-        if self.trigger_word in IN:
-            word = IN.split(' ')
-            print('Processing call %s %s' % (self.trigger_word, word[1]))
-            return self.retrieve(word[1])
-
-    def retrieve(self, word):
-        try:
-            source = urlopen(
-                self.url + quote(word)).read()  # .decode('latin-1', 'ignore')
-        except urllib.error.HTTPError:
-            return 'Non ecsiste.'
-
-        if self.error_key in source:
-            z = source.find(self.front_rebound_trim)
-            z += len(self.front_rebound_trim)
-            k = source.find(self.back_rebound_trim, z)
-
-            print(source[z:k])
-            print(source[z:k].decode('UTF-8', 'ignore'))
-            print(source[z:k].decode('latin-1', 'ignore'))
-            source_to = self.url.encode('UTF-8', 'ignore')
-            source = source_to.decode('unicode_escape', 'ignore') + \
-                 quote(source[z:k])
-
-            source = urlopen(source, timeout=20).read()
-        z = source.find(self.front_trim)
-        k = source.find(self.back_trim, z)
-
-        content = re.compile(r'<[^>]+>') \
-            .sub('', source[z:k].decode(self.charset, 'ignore'))
-
-        return content
-
-
-AUTO_RETRIEVE = []
-
-AUTO_RETRIEVE.append(
-    Retrieve(
-        '@dict',
-        'http://www.dicio.com.br/pesquisa.php?q=',
-        ftrim=b'</h2>',
-        btrim=b'<h2 class="tit-section">',
-        frtrim=b'href="',
-        brtrim=b'">',
-        error_key=b'o foram encontradas'
-    ),
-)
-
-AUTO_RETRIEVE.append(
-    Retrieve(
-        '@indict',
-        'http://www.dicionarioinformal.com.br/',
-        ftrim=b'<p class="text-justify">',
-        btrim=b'</p>',
-        frtrim=b'<div class="di-blue-link" style="font-size:20px;"><a href="',
-        brtrim=b'"',
-    ),
-)
-
-AUTO_RETRIEVE.append(
-    Retrieve(
-        '@wiki',
-        'https://pt.wikipedia.org/wiki/',
-        ftrim=b'<p>',
-        btrim=b'</p>',
-        frtrim=b'<span class="searchmatch>',
-        brtrim=b'</span>',
-        error_key=b'o produziu resultados.',
-        charset='UTF-8',
-    ),
-)
