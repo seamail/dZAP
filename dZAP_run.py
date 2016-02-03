@@ -28,7 +28,7 @@ from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
 from bot.retrieve import AUTO_RETRIEVE
 
 #small dispositive to help me strace this shit. disposable..
-input('go')
+#input('go')
 
 #function to load credentials from the CREDENTIALS file in the same folder as this script.. template:
 
@@ -175,7 +175,7 @@ class window(Thread):
         CONTENT = self.TEXTIN.get("1.0",END)[:-1]
 
         for AUTO in AUTO_RETRIEVE:
-            if AUTO.TRIGGER_WORD == event:
+            if AUTO.trigger_word == event:
                 print('>>>>'+CONTENT)
                 CONTENT = AUTO.retrieve(CONTENT)
 
@@ -312,6 +312,9 @@ class window(Thread):
             FROM = TO
         else:
             FROM = message.getFrom()
+            for G in self.GROUPS:
+                if FROM in G.address:
+                    FROM = G.subject
 
         DATE = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 

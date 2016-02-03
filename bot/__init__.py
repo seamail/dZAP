@@ -162,6 +162,12 @@ class Bot:
             if auto.trigger(output):
                 return out
 
+        if output[0] == '>':
+            return self.chat.respond(output[1:])
+
+        else:
+            if len(output) < 23:
+                self.chat.read(output)
     def getCliLayer(self, layer):
         self.CliLayer = layer
 

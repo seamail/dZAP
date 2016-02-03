@@ -50,8 +50,8 @@ class Cli(object):
                     self.commands[cmd] = {}
 
                 self.commands[cmd][subcommand] = {
-                   "args": inspect.signature(fn)[0][1:],
-                   "optional": len(inspect.signature(fn)[3]) if inspect.signature(fn)[3] else 0,
+                   "args": list(inspect.signature(fn).parameters.keys())[1:],
+                   #"optional": len(inspect.signature(fn)[3]) if inspect.signature(fn)[3] else 0,
                    "desc": fn.clidesc,
                    "fn": fn,
                    "order": fn.cliorder
