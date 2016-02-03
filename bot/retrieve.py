@@ -97,6 +97,11 @@ _RETRIEVER_WIKI = _Retrieve(
     charset='UTF-8',
 )
 
+_RETRIEVER_JOKE = _Retrieve(
+    '@kkk',
+    'https://www.piadas.com.br',
+    
+)
 
 AUTO_RETRIEVE = (
     _RETRIEVER_DICIO,

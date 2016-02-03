@@ -6,6 +6,7 @@ from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
     wikipedia, retrieve_porn, retrieve_salmo
 from bot.retrieve import AUTO_RETRIEVE
 
+from bot.chat import Chatbrain
 
 class Bot:
 
@@ -26,6 +27,7 @@ class Bot:
 
         self.window = None
 
+        self.chat = Chatbrain()
     def load_ban_word(self):
         if not os.path.isfile('banword.txt'):
             return
