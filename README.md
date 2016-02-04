@@ -5,6 +5,7 @@
 ##Dependencies:
 
 YOWSUP:  https://github.com/tgalal/yowsup
+Chatterbot: https://github.com/gunthercox/ChatterBot (for automated conversation)
 
 ## Run:
 

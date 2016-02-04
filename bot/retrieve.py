@@ -4,6 +4,7 @@ import re
 import urllib
 from urllib.parse import quote
 
+from random import randrange
 
 class _Retrieve:
 
@@ -17,6 +18,8 @@ class _Retrieve:
             brtrim='',
             error_key=b'koytr1we0ewrt',
             charset='latin-1',
+            Mftrim = None,
+            Mbtrim = '"'
     ):
         self.url = url
         self.trigger_word = callword
@@ -25,6 +28,9 @@ class _Retrieve:
         self.back_trim = btrim
         self.front_rebound_trim = frtrim
         self.back_rebound_trim = brtrim
+
+        self.menu_trim = Mftrim
+        self.menu_back_trim = Mbtrim
 
         self.charset = charset
 
@@ -36,10 +42,27 @@ class _Retrieve:
             print('Processing call %s %s' % (self.trigger_word, word[1]))
             return self.retrieve(word[1])
 
+    def submenu(self):
+        source = self.url
+
+        table = [m.start() for m in re.finditer(self.menu_front_trim, source)]
+        results = []
+        
+        for Z in table:
+            K = source.find(self.menu_back_trim, Z)
+            results.append(source[Z:K])
+
+        X = randrange(len(results))
+
+        self.retrieve('x')#,url=self.url+results[X])
+                
+
+
+    
     def retrieve(self, word):
         try:
             source = urlopen(
-                self.url + quote(word)).read()  # .decode('latin-1', 'ignore')
+                url + quote(word)).read()  # .decode('latin-1', 'ignore')
         except urllib.error.HTTPError:
             return 'Non ecsiste.'
 
@@ -51,7 +74,7 @@ class _Retrieve:
             print(source[z:k])
             print(source[z:k].decode('UTF-8', 'ignore'))
             print(source[z:k].decode('latin-1', 'ignore'))
-            source_to = self.url.encode('UTF-8', 'ignore')
+            source_to = url.encode('UTF-8', 'ignore')
             source = source_to.decode('unicode_escape', 'ignore') + \
                      quote(source[z:k])
 

@@ -114,14 +114,14 @@ class window(Thread):
 
             self.label = Label(master)
             self.label['text'] = self.subject
-            self.label.grid(column=0, row=index+2)
+            self.label.grid(column=0, row=index)
 
             self.ACT = Button(master)
             self.ACT['text'] = ' '
             self.ACT['activebackground'] = 'grey'
             self.ACT['command'] = self.activate
             self.ACT['background'] = 'black'
-            self.ACT.grid(column=1, row=index+2)
+            self.ACT.grid(column=1, row=index)
 
             self.ACTIVE = 0
 
@@ -174,10 +174,11 @@ class window(Thread):
         sent=[]
         CONTENT = self.TEXTIN.get("1.0",END)[:-1]
 
-        for AUTO in AUTO_RETRIEVE:
-            if AUTO.trigger_word == event:
-                print('>>>>'+CONTENT)
-                CONTENT = AUTO.retrieve(CONTENT)
+        if event:
+            for AUTO in AUTO_RETRIEVE:
+                if AUTO.trigger_word == event:
+                    print('>>>>'+CONTENT)
+                    CONTENT = AUTO.retrieve(CONTENT)
 
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
@@ -193,26 +194,31 @@ class window(Thread):
         self.root.protocol("WM_DELETE_WINDOW", self.callback)
         self.root.resizable(width=FALSE, height=FALSE)
 
-        self.VISOR = Frame(self.root, height = 600, width=500)
-        self.VISOR.grid(column=0,row=0,columnspan=4)
+        self.VISOR = Frame(self.root, height = 600, width=500,borderwidth=3,relief=GROOVE)
+        self.VISOR.grid(column=2,row=0,columnspan=4,)
         self.VISOR.grid_propagate(False)
         '''for I in range(10):
             self.SHOWNMESSAGE.append(displayed_message(" ", " ", " ", master=self.VISOR))
             self.SHOWNMESSAGE[I].grid(column=0, row=I)'''
 
         self.TEXTIN = Text(self.root, height=2, width=73)
-        self.TEXTIN.grid(column=0,row=1,columnspan=4, sticky=W+E)
-        self.SEND = Button(self.root, text = 'SEND', command = lambda: self.sendtext()).grid(column=2,row=2)
+        self.TEXTIN.grid(column=0,row=1,columnspan=6, sticky=W+E)
+        
+        self.SEND = Button(self.root, text = 'SEND', command = lambda: self.sendtext()).grid(column=0,row=2,columnspan=6, sticky=W+E)
         self.SENDVOICE = Button(self.root, text= 'SENDVOICE', command = self.send_voice).grid(column=2,row=3)
         self.REFRESH = Button(self.root, text = 'REFRESH', command = self.getinfo).grid(column=3,row=4)
         self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
         self.ADM = Button(self.root, text = 'toADM')
         self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.GROUPS[2].address, self.TEXTIN.get("1.0",END)[:-1])
-        self.ADM.grid(column=3,row=2)
+        self.ADM.grid(column=4,row=3)
         self.BROWSE = Button(self.root, text= 'browse file')
         self.BROWSE["command"] = lambda: self.browsefiles(self.TEXTIN)
         self.BROWSE.grid(column=2, row=4)
 
+
+        self.contactlist = Frame(self.root,borderwidth=3,relief=GROOVE)
+        self.contactlist.grid(column=0,row=0,sticky=NS)
+    
         self.root.wm_title(self.NAME)
         self.menubar = Menu(self.root)
 
@@ -223,6 +229,7 @@ class window(Thread):
         self.AUTOMATE.add_command(label ="@dict", command = lambda: self.sendtext(event='@dict'))
         self.AUTOMATE.add_command(label ="@indict", command = lambda: self.sendtext(event='@indict'))
         self.AUTOMATE.add_command(label ="@wiki", command = lambda: self.sendtext(event='@wiki'))
+        self.AUTOMATE.add_command(label ="@kkk", command = lambda: self.sendtext(event='@kkk'))
         self.AUTOMATE.add_command(label ='Vestibular', command = lambda: BOT.govestibular(self.GROUPS[self.highlighted_group()].address))
 
         self.PROFILE = Menu(self.menubar)
@@ -247,6 +254,11 @@ class window(Thread):
 
         self.root.config(menu=self.menubar)
 
+
+        
+
+
+        
         sleep(2)
         self.getinfo()
 
@@ -313,7 +325,7 @@ class window(Thread):
         else:
             FROM = message.getFrom()
             for G in self.GROUPS:
-                if FROM in G.address:
+                if G.address in FROM:
                     FROM = G.subject
 
         DATE = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
@@ -347,14 +359,14 @@ class window(Thread):
                 for line in contacts:
                     if len(line) > 3:
                         person = line[:-1].split(';')
-                        self.GROUPS.append(self.group(person[1], [], person[0], I, self.root))
+                        self.GROUPS.append(self.group(person[1], [], person[0], I, self.contactlist))
                         I+=1
 
                 for G in INFO.groupsList:
                     PARTY = G.getParticipants()
                     SUBJ = G.getSubject()
                     ID = G.getId()
-                    self.GROUPS.append(self.group(ID, PARTY, SUBJ, I, self.root))
+                    self.GROUPS.append(self.group(ID, PARTY, SUBJ, I, self.contactlist))
                     I+=1
         except AttributeError:
             pass

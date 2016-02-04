@@ -11,7 +11,7 @@ class Chatbrain ():
                    logic_adapters=["chatterbot.adapters.logic.EvaluateMathematically",
                                   #"chatterbot.adapters.logic.TimeLogicAdapter"])
                                   "chatterbot.adapters.logic.ClosestMatchAdapter"],
-                    io_adapter="chatterbot.adapters.io.NoOutputAdapter")
+                    io_adapter="chatterbot.adapters.io.SelectiveAdapter")
         
         self.brain.train("chatterbot.corpus.Portuguese.conversations_pt-BR")
 

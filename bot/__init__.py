@@ -6,7 +6,7 @@ from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
     wikipedia, retrieve_porn, retrieve_salmo
 from bot.retrieve import AUTO_RETRIEVE
 
-from bot.chat import Chatbrain
+
 
 class Bot:
 
@@ -26,8 +26,12 @@ class Bot:
         self.on_vestibular = 0
 
         self.window = None
-
-        self.chat = Chatbrain()
+        try:
+            from bot.chat import Chatbrain
+            self.chat = Chatbrain()
+        except ImportError:
+            print("Can't find Chatterbot module. Automatic conversation disabled."
+    
     def load_ban_word(self):
         if not os.path.isfile('banword.txt'):
             return
@@ -43,6 +47,10 @@ class Bot:
     def read_output(self, output, sender, participant):
         output = output.lower()
         current_time = time()
+
+        print(output[0])
+        print(output[1])
+
 
         for BWK in self.ban_words:
             if BWK[1] in output:
@@ -161,13 +169,15 @@ class Bot:
             out = auto.trigger(output)
             if auto.trigger(output):
                 return out
+        if self.chat:
+            if output[0] == '>':
+                self.chat.read(output[1:0])
+                return self.chat.respond(output[1:])
 
-        if output[0] == '>':
-            return self.chat.respond(output[1:])
+            else:
+                if len(output) < 23:
+                    self.chat.read(output)
 
-        else:
-            if len(output) < 23:
-                self.chat.read(output)
     def getCliLayer(self, layer):
         self.CliLayer = layer
 
