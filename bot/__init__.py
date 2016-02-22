@@ -168,7 +168,7 @@ class Bot:
             return
         elif '@hippie' in output:
             Result = retrieve_locality(-21.771, -41.35)
-            return "Voce devia ir pra %s, %s..." % (Result[0], Result[2])
+            return "Voce devia ir pra %s, %s..." % (Result[0], Result[1])
         for auto in AUTO_RETRIEVE:
             out = auto.trigger(output)
             if auto.trigger(output):

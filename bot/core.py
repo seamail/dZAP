@@ -9,6 +9,8 @@ from subprocess import call
 import unicodedata
 import urllib
 
+import json
+
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -405,10 +407,10 @@ def vestibular_questao():
 
 def retrieve_locality(Ilat,Ilng):
     mult = [-1,1]
-    V = random.randrange(0,1)
-    lat = Ilat + random.uniform(0,2)*mult[V]
-    V = random.randrange(0,1)
-    lng = Ilng + random.uniform(0,2)*mult[V]
+    V = randrange(0,1)
+    lat = Ilat + uniform(0,2)*mult[V]
+    V = randrange(0,1)
+    lng = Ilng + uniform(0,2)*mult[V]
 
     URL = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+','+str(lng)+"&sensor=false"
     Content = urllib.request.urlopen(URL).read().decode('utf-8')
@@ -425,14 +427,15 @@ def retrieve_locality(Ilat,Ilng):
         return retrieve_locality(Ilat,Ilng)        
         
     for component in result["address_components"]:
-        if 'administrative_area_level_2' in component["types"]:
+        #if 'administrative_area_level_2' in component["types"]:
             #print('>>> %s' % component['short_name'])
-            Result.append(component['short_name'])
+            #Result.append(component['short_name'])
         if 'administrative_area_level_1' in component["types"]:
             #print('>>> %s' % component['short_name'])
             Result.append(component['short_name'])
         if 'locality' in component["types"]:
             #print('>> %s' % component['short_name'])
             Result.append(component['short_name'])
-
+    if len(Result) < 2:
+        return retrieve_locality(Ilat,Ilng)    
     return Result
