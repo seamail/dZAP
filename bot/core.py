@@ -403,3 +403,50 @@ def vestibular_questao():
 
     return ['questioncache.jpg', resposta]
 
+def retrieve_locality(Ilat,Ilng):
+    mult = [-1,1]
+
+    V = random.randrange(0,1)
+    lat = Ilat + random.uniform(0,2)*mult[V]
+    V = random.randrange(0,1)
+    lng = Ilng + random.uniform(0,2)*mult[V]
+
+    URL = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+','+str(lng)+"&sensor=false"
+    Content = urllib.request.urlopen(URL).read().decode('utf-8')
+
+
+
+    #print(Content)
+
+    jsondata = json.loads(Content)
+
+    Result = []
+
+    #logging.info("geography:"+str(jsondata["results"][1]["formatted_address"]))
+    region = None
+    city = None
+    
+    if len(jsondata["results"]) ==0:
+        #print('fail')
+        return retrieve_locality(Ilat,Ilng)
+    result = jsondata["results"][0]
+
+    if len(result["address_components"]) < 2:
+        #print('fail')
+        return retrieve_locality(Ilat,Ilng)        
+        
+    for component in result["address_components"]:
+        #print(component)
+
+        if 'administrative_area_level_2' in component["types"]:
+            #print('>>> %s' % component['short_name'])
+            Result.append(component['short_name'])
+        if 'administrative_area_level_1' in component["types"]:
+            #print('>>> %s' % component['short_name'])
+            Result.append(component['short_name'])
+        if 'locality' in component["types"]:
+            #print('>> %s' % component['short_name'])
+            Result.append(component['short_name'])
+
+
+    return Result

@@ -71,7 +71,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     def getBot(self):
         return BOT
-
+    
     def aliasToJid(self, calias):
         for alias, ajid in self.jidAliases.items():
             if calias.lower() == alias.lower():

@@ -30,7 +30,8 @@ class Bot:
             from bot.chat import Chatbrain
             self.chat = Chatbrain()
         except ImportError:
-            print("Can't find Chatterbot module. Automatic conversation disabled."
+            self.chat = None
+            print("Can't find Chatterbot module. Automatic conversation disabled.")
     
     def load_ban_word(self):
         if not os.path.isfile('banword.txt'):
@@ -165,6 +166,9 @@ class Bot:
         elif '@roleta' in output:
             self.roleta_russa(sender)
             return
+        elif '@hippie' in output:
+            Result = retrieve_locality(-21.771, -41.35)
+            return "Voce devia ir pra %s, %s..." % (Result[0], Result[2])
         for auto in AUTO_RETRIEVE:
             out = auto.trigger(output)
             if auto.trigger(output):
