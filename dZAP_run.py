@@ -279,7 +279,7 @@ class window(Thread):
         if attribute == 'nick':
             self.YOWCLI.presence_name(self.editprofile.TEXT.get('1.0',END))
         elif attribute == 'status':
-            self.YOWCLI.profile_setStatus(self.editprofile.TEXT.get('1.0',END))
+            self.YOWCLI.profile_setStatus(self.editprofile.TEXT.get('1.0',END).encode('utf-8'))
         elif attribute == 'image':
             self.YOWCLI.profile_setPicture(self.editprofile.TEXT.get('1.0',END)[:-1])
         else:
