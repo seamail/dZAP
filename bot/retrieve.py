@@ -62,7 +62,7 @@ class _Retrieve:
     def retrieve(self, word):
         try:
             source = urlopen(
-                url + quote(word)).read()  # .decode('latin-1', 'ignore')
+                self.url + quote(word)).read()  # .decode('latin-1', 'ignore')
         except urllib.error.HTTPError:
             return 'Non ecsiste.'
 

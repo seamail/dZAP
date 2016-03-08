@@ -1,3 +1,7 @@
+#!/usr/bin/python
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 from threading import *
 from time import *
@@ -24,8 +28,10 @@ from yowsup.layers.protocol_notifications import YowNotificationsProtocolLayer
 from yowsup.layers.protocol_presence import YowPresenceProtocolLayer
 from yowsup.layers.protocol_profiles import YowProfilesProtocolLayer
 from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
+from yowsup.layers.axolotl import YowAxolotlLayer
 
 from bot.retrieve import AUTO_RETRIEVE
+
 
 #small dispositive to help me strace this shit. disposable..
 #input('go')
@@ -150,6 +156,7 @@ class window(Thread):
         self.auto_window.mainloop()
 
     def __init__(self):
+        self.LOADED=0
         Thread.__init__(self)
 
         self.NAME = 'dZAP'
@@ -162,7 +169,9 @@ class window(Thread):
         self.MSGREADINDEX = 0
         self.MSGABSINDEX = 0
 
-        self.YOWCLI = stack.getLayer(6)
+        self.YOWCLI = stack.getLayer(7)
+
+        
 
         self.SHOWNMESSAGE = []
 
@@ -209,13 +218,15 @@ class window(Thread):
         self.REFRESH = Button(self.root, text = 'REFRESH', command = self.getinfo).grid(column=3,row=4)
         self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
         self.ADM = Button(self.root, text = 'toADM')
-        self.ADM["command"] = lambda: stack.getLayer(6).group_promote(self.GROUPS[2].address, self.TEXTIN.get("1.0",END)[:-1])
+        self.ADM["command"] = lambda: self.YOWCLI.group_promote(self.GROUPS[2].address, self.TEXTIN.get("1.0",END)[:-1])
         self.ADM.grid(column=4,row=3)
         self.BROWSE = Button(self.root, text= 'browse file')
         self.BROWSE["command"] = lambda: self.browsefiles(self.TEXTIN)
         self.BROWSE.grid(column=2, row=4)
 
-
+        self.BOTRESPONSE = Scale(self.root, from_=100, to=0)
+        self.BOTRESPONSE.grid(column=0, row=3, rowspan=2)
+        
         self.contactlist = Frame(self.root,borderwidth=3,relief=GROOVE)
         self.contactlist.grid(column=0,row=0,sticky=NS)
     
@@ -261,7 +272,7 @@ class window(Thread):
         
         sleep(2)
         self.getinfo()
-
+        self.LOADED = 1
         self.root.mainloop()
 
     def edit_profileSAVEQUIT(self,attribute):
@@ -298,9 +309,12 @@ class window(Thread):
         target.insert('1.0', filedialog.askopenfilename(title = "escolha a imagem.",))
 
     def refresh_message(self):
-        while self.MSGREADINDEX < len(stack.getLayer(6).MESSAGES):
-            self.showmessage(stack.getLayer(6).MESSAGES[self.MSGREADINDEX])
+        while self.MSGREADINDEX < len(self.YOWCLI.MESSAGES):
+            self.showmessage(self.YOWCLI.MESSAGES[self.MSGREADINDEX])
             self.MSGREADINDEX+=1
+
+        self.MSGREADINDEX=0
+        self.YOWCLI.MESSAGES = []
 
     def send_voice(self):#convert text input to synthetized voice, and send the file.
         for GROUP in self.GROUPS:
@@ -313,7 +327,7 @@ class window(Thread):
         INDEX = self.MSGABSINDEX*3
 
         try:
-            text_content = message.getBody().decode('utf-8','ignore')
+            text_content = message.getBody().encode('latin-1').decode()
         except AttributeError:
             text_content = message.getBody()
 
@@ -343,9 +357,9 @@ class window(Thread):
         self.MSGABSINDEX+=1
 
     def getinfo(self):#send group info request.
-        stack.getLayer(6).groups_list()
+        self.YOWCLI.groups_list()
         sleep(2)
-        self.process(stack.getLayer(6).LASTIQ)
+        self.process(self.YOWCLI.LASTIQ)
 
     def process(self, INFO):#receive and interprete the info we asked to the server in the getinfo() function, to load the GUI with the appropriate buttons.
         #also appends any contact you got on CONTACTS file, so the contacts and groups will appear on the same list on the app.
@@ -408,6 +422,7 @@ if __name__==  "__main__":
             [
                 YowAuthenticationProtocolLayer,
                 YowMessagesProtocolLayer,
+         
                 YowReceiptProtocolLayer,
                 YowAckProtocolLayer,
                 YowGroupsProtocolLayer,
@@ -416,8 +431,9 @@ if __name__==  "__main__":
                 YowPresenceProtocolLayer,
                 YowMediaProtocolLayer,
                 YowNotificationsProtocolLayer,
-            ]
-        )
+            ]),
+            YowAxolotlLayer
+        
     ) + YOWSUP_CORE_LAYERS
 
     stack = YowStack(layers)
@@ -428,8 +444,8 @@ if __name__==  "__main__":
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
 
     #setting bot and cli layer to know each other.
-    BOT = stack.getLayer(6).getBot()
-    BOT.getCliLayer(stack.getLayer(6))
+    BOT = stack.getLayer(7).getBot()
+    BOT.getCliLayer(stack.getLayer(7))
 
     #starting the GUI and client; set BOT to recognize the window instance.
     app = window()

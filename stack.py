@@ -3,6 +3,7 @@ import sys
 from yowsup.layers import YowLayerEvent
 from yowsup.layers.auth import AuthError
 from yowsup.stacks import  YowStackBuilder
+from yowsup.layers.auth import YowAuthenticationProtocolLayer
 
 from layer import YowsupCliLayer
 

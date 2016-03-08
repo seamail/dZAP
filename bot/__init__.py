@@ -3,8 +3,13 @@ from random import *
 from time import *
 
 from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
-    wikipedia, retrieve_porn, retrieve_salmo
+    wikipedia, retrieve_porn, retrieve_salmo, retrieve_locality
 from bot.retrieve import AUTO_RETRIEVE
+
+from urllib.request import urlopen
+
+#Choose to load the conversation bot. It requires chatterbot module and mongoDB.
+LOAD_CONVERSATION_BOT = True
 
 
 
@@ -26,12 +31,15 @@ class Bot:
         self.on_vestibular = 0
 
         self.window = None
-        try:
-            from bot.chat import Chatbrain
-            self.chat = Chatbrain()
-        except ImportError:
-            self.chat = None
-            print("Can't find Chatterbot module. Automatic conversation disabled.")
+        self.chat = None
+        
+        if LOAD_CONVERSATION_BOT:
+            try:
+                from bot.chat import Chatbrain
+                self.chat = Chatbrain()
+            except ImportError:
+                self.chat = None
+                print("Can't find Chatterbot module. Automatic conversation disabled.")
     
     def load_ban_word(self):
         if not os.path.isfile('banword.txt'):
@@ -49,8 +57,8 @@ class Bot:
         output = output.lower()
         current_time = time()
 
-        print(output[0])
-        print(output[1])
+        #print(output[0])
+        #print(output[1])
 
 
         for BWK in self.ban_words:
@@ -146,7 +154,8 @@ class Bot:
             @jesus pra ouvir um pouco da palavra de DEUS.\n
             @diz [frase] q eu te mando um áudio falando tal frase;\n
             @enema pra se inscrever no meu vestibular lixo.\n
-            E é só isso mermo seus troxa."""
+            @hippie se quiser conhecer novos lugares.\n
+            Tô aqui pra ajudar vocês a me ajudarem."""
             return msg
         elif '@diz' in output:
             x = output.find('@diz') + 4
@@ -168,6 +177,9 @@ class Bot:
             return
         elif '@hippie' in output:
             Result = retrieve_locality(-21.771, -41.35)
+            if ' moderno' in output:
+                self.sendimage(sender, 'https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=12&size=640x480&key=AIzaSyAN8DCnslHInk8dHFFQIPPI9-W-eP4sly8'
+                                         %(Result[3][0],Result[3][1]))
             return "Voce devia ir pra %s, %s..." % (Result[0], Result[1])
         for auto in AUTO_RETRIEVE:
             out = auto.trigger(output)
@@ -179,14 +191,27 @@ class Bot:
                 return self.chat.respond(output[1:])
 
             else:
-                if len(output) < 23:
+                if len(output) < 46:
                     self.chat.read(output)
+                    rep = self.chat.respond(output)
+                    if randrange(100) < self.window.BOTRESPONSE.get(): return rep
+                    return
 
     def getCliLayer(self, layer):
         self.CliLayer = layer
 
     def sendmessage(self, to, msg):
         self.CliLayer.message_send(to, msg)
+
+    def sendimage(self, to, url):
+        filename = 'cache.jpg'
+        file_ = urlopen(url)
+        Fo = open(filename, 'wb')
+        Fo.write(file_.read())
+        Fo.close()
+
+        self.CliLayer.image_send(to, filename)
+        
 
     def govestibular(self, group):
         party = None

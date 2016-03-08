@@ -8,6 +8,7 @@ class Chatbrain ():
     def __init__(self):
         
         self.brain = ChatBot("Adolfo",
+                storage_adapter = "chatterbot.adapters.storage.MongoDatabaseAdapter",
                    logic_adapters=["chatterbot.adapters.logic.EvaluateMathematically",
                                   #"chatterbot.adapters.logic.TimeLogicAdapter"])
                                   "chatterbot.adapters.logic.ClosestMatchAdapter"],
@@ -19,3 +20,8 @@ class Chatbrain ():
         return self.brain.get_response(textin)
     def read(self, inputc):
         self.brain.io.process_input(statement=inputc)
+
+
+
+
+

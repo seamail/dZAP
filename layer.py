@@ -62,6 +62,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         self.LASTIQ = ""
         self.MESSAGES = []
 
+
         #add aliases to make it user to use commands. for example you can then do:
         # /message send foobar "HI"
         # and then it will get automaticlaly mapped to foobar's jid
@@ -492,7 +493,10 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             except UnicodeEncodeError:
                 return
 
-            self.MESSAGES.append(message)
+            
+            if BOT.window:
+                if BOT.window.LOADED: BOT.window.refresh_message()
+            
             #self.output(message.getBody(), tag = "%s [%s]"%(message.getFrom(), formattedDate))
             messageOut = self.getTextMessageBody(message)
         elif message.getType() == "media":
@@ -508,11 +512,16 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             MESSAGE = messageOut.encode('latin-1').decode() if sys.version_info >= (3, 0) else messageOut,
             MESSAGE_ID = message.getId()
             )
+        self.MESSAGES.append(message)
 
         #read content of messages!
         if time() - message.getTimestamp() < 130:
             sender = message.getFrom()
-            participant = message.getParticipant(False)
+            try:
+                participant = message.getParticipant(False)
+            except:
+                print('fail.')
+                return
             BOTSAYS = BOT.read_output(messageOut.encode('latin-1').decode(), sender, participant)
             if BOTSAYS != None:
                 if type(BOTSAYS) == list:
@@ -535,7 +544,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         if self.sendReceipts:
             self.toLower(message.ack())
             self.output("Sent delivered receipt", tag = "Message %s" % message.getId())
-
+        
     def getTextMessageBody(self, message):
         return message.getBody()
 

@@ -27,8 +27,9 @@ def retrieve_joke():
             if z >= 0:
                 k = line.find(b'">', z)
                 category.append(line[z + 9:k])
+    #print(category)
 
-    chosen_cat = category[randrange(0, len(category))].decode("UTF-8")
+    chosen_cat = category[randrange(len(category))].decode("UTF-8")
 
     cat_content = urlopen(url + chosen_cat).readlines()
     joke = []
@@ -437,5 +438,17 @@ def retrieve_locality(Ilat,Ilng):
             #print('>> %s' % component['short_name'])
             Result.append(component['short_name'])
     if len(Result) < 2:
-        return retrieve_locality(Ilat,Ilng)    
+        return retrieve_locality(Ilat,Ilng)
+    Result.append([lat,lng])
+
+    middlelat = (Ilat - lat)/2
+    middlelat = middlelat + lat
+    middlelng = (Ilng - lng)/2
+    middlelng = middlelng + lng
+
+    print("Coord Origin: %f,%f   Middle: %f,%f   Destination: %f,%f" %
+          (Ilat,Ilng,middlelat,middlelng,lat,lng))
+    
+    Result.append([middlelat,middlelng])
+    
     return Result
