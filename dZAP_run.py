@@ -325,11 +325,10 @@ class window(Thread):
 
     def showmessage(self, message, TO = None):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
+        if not message.getType() == "text": return
+ 
+        text_content = message.getBody().decode('utf-8', 'ignore')
 
-        try:
-            text_content = message.getBody().encode('latin-1').decode()
-        except AttributeError:
-            text_content = message.getBody()
 
         for K in range(round(len(text_content)/60)):
             text_content = text_content[:60*K] + "\n" + text_content[60*K:]
@@ -344,8 +343,11 @@ class window(Thread):
 
         DATE = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
-        self.SHOWNMESSAGE.append(displayed_message(FROM, DATE, text_content, master=self.VISOR))
-
+        try:
+            self.SHOWNMESSAGE.append(displayed_message(FROM, DATE, text_content, master=self.VISOR))
+        except TclError:
+            print('Tkinter Error!')
+            pass
         if len(self.SHOWNMESSAGE) > 10:
             self.SHOWNMESSAGE.pop(0)
 

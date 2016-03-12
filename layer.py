@@ -488,6 +488,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         formattedDate = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
         if message.getType() == "text":
+            self.MESSAGES.append(message)
             try:
                 message.getBody().encode('utf-8')
             except UnicodeEncodeError:
@@ -512,7 +513,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
             MESSAGE = messageOut.encode('latin-1').decode() if sys.version_info >= (3, 0) else messageOut,
             MESSAGE_ID = message.getId()
             )
-        self.MESSAGES.append(message)
+        
 
         #read content of messages!
         if time() - message.getTimestamp() < 130:
