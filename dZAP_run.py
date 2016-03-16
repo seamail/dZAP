@@ -326,7 +326,8 @@ class window(Thread):
 
     def showmessage(self, message, TO = None):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
-        if not message.getType() == "text": return
+        
+        if not message or not message.getType() == "text": return
 
         if not type(message.getBody) == str: 
             text_content = message.getBody()#.decode('utf-8', 'ignore')

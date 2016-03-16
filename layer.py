@@ -364,7 +364,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         #if self.assertConnected():
         outgoingMessage = TextMessageProtocolEntity(content.encode("utf-8") if sys.version_info >= (3,0) else content, to = self.aliasToJid(number))
         self.toLower(outgoingMessage)
-
+        return outgoingMessage
 
     @clicmd("Broadcast message. numbers should comma separated phone numbers")
     def message_broadcast(self, numbers, content):
