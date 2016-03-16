@@ -4,8 +4,8 @@
 
 ##Dependencies:
 
-YOWSUP:  https://github.com/tgalal/yowsup
-Chatterbot: https://github.com/gunthercox/ChatterBot (for automated conversation)
+(YOWSUP) [https://github.com/tgalal/yowsup] (yowsup-develop and axolotl-develop are strongly recommended)
+(Chatterbot)[https://github.com/gunthercox/ChatterBot] (for automated conversation)
 
 ## Run:
 

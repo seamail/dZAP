@@ -191,6 +191,7 @@ class window(Thread):
 
         for GROUP in self.GROUPS:
             if GROUP.ACTIVE == 1:
+                print(GROUP.address)
                 MSG = self.YOWCLI.message_send(GROUP.address, CONTENT)
                 sent.append(GROUP.address)
 
@@ -326,8 +327,9 @@ class window(Thread):
     def showmessage(self, message, TO = None):#refresh message viewing visor.
         INDEX = self.MSGABSINDEX*3
         if not message.getType() == "text": return
- 
-        text_content = message.getBody().decode('utf-8', 'ignore')
+
+        if not type(message.getBody) == str: 
+            text_content = message.getBody()#.decode('utf-8', 'ignore')
 
 
         for K in range(round(len(text_content)/60)):
