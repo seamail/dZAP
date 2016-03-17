@@ -488,6 +488,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         formattedDate = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
         if message.getType() == "text":
+            message.body = message.body.encode('latin-1', 'ignore').decode('utf-8','ignore') 
             self.MESSAGES.append(message)
             try:
                 message.getBody().encode('utf-8')
@@ -510,7 +511,7 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         output = self.__class__.MESSAGE_FORMAT.format(
             FROM = sender,
             TIME = formattedDate,
-            MESSAGE = messageOut.encode('latin-1').decode() if sys.version_info >= (3, 0) else messageOut,
+            MESSAGE = messageOut if sys.version_info >= (3, 0) else messageOut,
             MESSAGE_ID = message.getId()
             )
         
@@ -518,15 +519,15 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         #read content of messages!
         if time() - message.getTimestamp() < 130:
             sender = message.getFrom()
-            try:
-                participant = message.getParticipant(False)
-            except:
-                print('fail.')
-                return
-            BOTSAYS = BOT.read_output(messageOut.encode('latin-1').decode(), sender, participant)
+            if not message.isGroupMessage():
+                participant = 0
+            else:
+                participant = message.getParticipant(False) 
+
+            BOTSAYS = BOT.read_output(messageOut, sender, participant)
             if BOTSAYS != None:
                 if type(BOTSAYS) == list:
-                    self.group_kick(sender, self.normalizeJid(message.getParticipant(False)))
+                    self.group_kick(sender, participant)
                     BOTSAYS = BOTSAYS[0]
 
                 if BOTSAYS[-3:] == 'jpg':

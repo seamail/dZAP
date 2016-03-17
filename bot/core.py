@@ -333,12 +333,12 @@ def vestibular_questao():
 
     if question.find('e)') == -1: return vestibular_questao()
 
-    alterns = []
-    alterns.append(question[question.find('a)'):question.find('b)')])
-    alterns.append(question[question.find('b)'):question.find('c)')])
-    alterns.append(question[question.find('c)'):question.find('d)')])
-    alterns.append(question[question.find('d)'):question.find('e)')])
-    alterns.append(question[question.find('e)'):])
+    alterns = [
+        question[question.find('a)'):question.find('b)')],
+        question[question.find('b)'):question.find('c)')],
+        question[question.find('c)'):question.find('d)')],
+        question[question.find('d)'):question.find('e)')],
+        question[question.find('e)'):]]
 
     question = question[:question.find('a)')]
 

@@ -12,6 +12,7 @@ from yowsup import env
 from yowsup.common import YowConstants
 from yowsup.layers import YowLayerEvent
 from yowsup.stacks import YOWSUP_CORE_LAYERS
+from yowsup.stacks import YOWSUP_FULL_STACK
 from yowsup.stacks import YowStack
 
 from layer import YowsupCliLayer
@@ -193,7 +194,7 @@ class window(Thread):
             if GROUP.ACTIVE == 1:
                 print(GROUP.address)
                 MSG = self.YOWCLI.message_send(GROUP.address, CONTENT)
-                sent.append(GROUP.address)
+                sent.append(GROUP.subject)
 
         self.TEXTIN.delete(1.0, END)
         if len(sent) > 0:
@@ -333,8 +334,8 @@ class window(Thread):
             text_content = message.getBody()#.decode('utf-8', 'ignore')
 
 
-        for K in range(round(len(text_content)/60)):
-            text_content = text_content[:60*K] + "\n" + text_content[60*K:]
+        #for K in range(round(len(text_content)/60)):
+        #    text_content = text_content[:60*K] + b'\n' + text_content[60*K:]
 
         if not message.getFrom():
             FROM = TO
@@ -374,12 +375,14 @@ class window(Thread):
                 I=0
 
                 contacts = open('CONTACTS','r').readlines()
-
+                contacts_togetkey = []
                 for line in contacts:
                     if len(line) > 3:
                         person = line[:-1].split(';')
                         self.GROUPS.append(self.group(person[1], [], person[0], I, self.contactlist))
+                        contacts_togetkey.append(person[1])
                         I+=1
+                        
 
                 for G in INFO.groupsList:
                     PARTY = G.getParticipants()
@@ -387,6 +390,12 @@ class window(Thread):
                     ID = G.getId()
                     self.GROUPS.append(self.group(ID, PARTY, SUBJ, I, self.contactlist))
                     I+=1
+
+
+                if len(contacts_togetkey)>0:
+                    self.YOWCLI.keys_get(contacts_togetkey)
+                    self.YOWCLI.keys_set()
+                    
         except AttributeError:
             pass
 
@@ -427,7 +436,6 @@ if __name__==  "__main__":
             [
                 YowAuthenticationProtocolLayer,
                 YowMessagesProtocolLayer,
-         
                 YowReceiptProtocolLayer,
                 YowAckProtocolLayer,
                 YowGroupsProtocolLayer,
@@ -436,11 +444,10 @@ if __name__==  "__main__":
                 YowPresenceProtocolLayer,
                 YowMediaProtocolLayer,
                 YowNotificationsProtocolLayer,
-            ]),
-            YowAxolotlLayer
+            ])
+            ,YowAxolotlLayer
         
     ) + YOWSUP_CORE_LAYERS
-
     stack = YowStack(layers)
     stack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, CREDENTIALS)         #setting credentials
     stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])    #whatsapp server address
@@ -448,9 +455,15 @@ if __name__==  "__main__":
     stack.setProp(YowCoderLayer.PROP_RESOURCE, env.CURRENT_ENV.getResource())          #info about us as WhatsApp client
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
 
+    
+    for i in range(8):
+        #print(str(i)+"="+str(stack.getLayer(i)))
+        if str(stack.getLayer(i)) == "CLI Interface Layer":
+               X = stack.getLayer(i)
+        
     #setting bot and cli layer to know each other.
-    BOT = stack.getLayer(7).getBot()
-    BOT.getCliLayer(stack.getLayer(7))
+    BOT = X.getBot()
+    BOT.getCliLayer(X)
 
     #starting the GUI and client; set BOT to recognize the window instance.
     app = window()
