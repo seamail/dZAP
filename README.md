@@ -11,7 +11,8 @@
 
 Clone and $python dZAP_run.py. Be sure to have a whatsapp account with a password that yow know: you can get it by rooting and hacking your phone (check google), or by creating a new account with YOWSUP tools (check its docs).. you will need a SIM card with working phone number to register.
 
-
+## Important:
+ PIP's version of google protobuf, which is required by yowsup library is outdated and will not work correctly. Get protobuf from github.<br>
 ## TIP:
 
  If you invite anyone who's not in your contact list to a group, you will get banned from whatsapp's network for 24h. They will know you are using a non-official client, so they ban, because this action is not possible on the original app. *you will get banned on the second event of this nature.

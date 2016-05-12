@@ -14,6 +14,7 @@ from yowsup.layers import YowLayerEvent
 from yowsup.stacks import YOWSUP_CORE_LAYERS
 from yowsup.stacks import YOWSUP_FULL_STACK
 from yowsup.stacks import YowStack
+from yowsup.stacks import YowStackBuilder
 
 from layer import YowsupCliLayer
 from yowsup.layers import YowParallelLayer
@@ -29,18 +30,16 @@ from yowsup.layers.protocol_notifications import YowNotificationsProtocolLayer
 from yowsup.layers.protocol_presence import YowPresenceProtocolLayer
 from yowsup.layers.protocol_profiles import YowProfilesProtocolLayer
 from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
-from yowsup.layers.axolotl import YowAxolotlLayer
+from yowsup.layers.axolotl import AxolotlSendLayer, AxolotlControlLayer, AxolotlReceivelayer
+from yowsup.env import YowsupEnv
 
 from bot.retrieve import AUTO_RETRIEVE
 
 
-#small dispositive to help me strace this shit. disposable..
-#input('go')
-
-#function to load credentials from the CREDENTIALS file in the same folder as this script.. template:
+#load credentials from the CREDENTIALS file in working folder.. template:
 
 #phone=*************
-#password=***************
+#password=**********
 def retrieve_credentials():
     if os.path.isfile('CREDENTIALS'):
         _CRED = open('CREDENTIALS', 'r').readlines()
@@ -156,7 +155,7 @@ class window(Thread):
         self.auto_window.wm_title(self.NAME + " [manage automation]")
         self.auto_window.mainloop()
 
-    def __init__(self):
+    def __init__(self, YOWCLI):
         self.LOADED=0
         Thread.__init__(self)
 
@@ -170,7 +169,7 @@ class window(Thread):
         self.MSGREADINDEX = 0
         self.MSGABSINDEX = 0
 
-        self.YOWCLI = stack.getLayer(7)
+        self.YOWCLI = YOWCLI
 
         
 
@@ -259,13 +258,17 @@ class window(Thread):
         self.GROUP.add_command(label="promote ALL", command = lambda: self.admin_toall(1))
 
         self.FILES = Menu(self.menubar)
-        self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.GROUPS[self.highlighted_group()].address, self.TEXTIN.get('1.0',END)[:-1]))
+        self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.highlighted_group().address, self.TEXTIN.get('1.0',END)[:-1]))
+
+        self.NETWORK = Menu(self.menubar)
+        #self.NETWORK.add_command((label="Send ACK", command = lambda: self.YOWCLI.      
         self.menubar.add_cascade(label = "PROFILE", menu = self.PROFILE)
         self.menubar.add_cascade(label = "GROUP", menu = self.GROUP)
         self.menubar.add_cascade(label = "AUTOMATE", menu = self.AUTOMATE)
         self.menubar.add_cascade(label = 'FILES', menu = self.FILES)
 
         self.root.config(menu=self.menubar)
+
 
 
         
@@ -426,46 +429,36 @@ class window(Thread):
 if __name__==  "__main__":
     #if credentials are unavailable, launch auth window.
     if len(CREDENTIALS[0]) < 2:
-        print(CREDENTIALS[0])
+        #print(CREDENTIALS[0])
         auth_w = auth_window()
 
     #initialize yowsup stack, with the layers we need.
-    layers = (
-        YowsupCliLayer,
-        YowParallelLayer(
-            [
-                YowAuthenticationProtocolLayer,
-                YowMessagesProtocolLayer,
-                YowReceiptProtocolLayer,
-                YowAckProtocolLayer,
-                YowGroupsProtocolLayer,
-                YowProfilesProtocolLayer,
-                YowChatstateProtocolLayer,
-                YowPresenceProtocolLayer,
-                YowMediaProtocolLayer,
-                YowNotificationsProtocolLayer,
-            ])
-            ,YowAxolotlLayer
-        
-    ) + YOWSUP_CORE_LAYERS
-    stack = YowStack(layers)
+    StackBuilder = YowStackBuilder()
+    stack = StackBuilder.getDefaultStack(layer=YowsupCliLayer, axolotl=True)
+    
     stack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, CREDENTIALS)         #setting credentials
     stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])    #whatsapp server address
     stack.setProp(YowCoderLayer.PROP_DOMAIN, YowConstants.DOMAIN)
-    stack.setProp(YowCoderLayer.PROP_RESOURCE, env.CURRENT_ENV.getResource())          #info about us as WhatsApp client
+    stack.setProp(YowCoderLayer.PROP_RESOURCE, YowsupEnv.getCurrent().getResource())     #info about us as WhatsApp client
     stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
 
     
-    for i in range(8):
-        #print(str(i)+"="+str(stack.getLayer(i)))
+    for i in range(9):
+        #print(str(i)+" = "+str(stack.getLayer(i)))
         if str(stack.getLayer(i)) == "CLI Interface Layer":
                X = stack.getLayer(i)
-        
+               break
+            
+    #print(X)
+    
     #setting bot and cli layer to know each other.
     BOT = X.getBot()
     BOT.getCliLayer(X)
 
+    #print(BOT.CliLayer)
+
     #starting the GUI and client; set BOT to recognize the window instance.
-    app = window()
+    app = window(X)
+    
     BOT.window = app
     stack.loop()

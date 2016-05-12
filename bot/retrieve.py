@@ -41,6 +41,8 @@ class _Retrieve:
             word = IN.split(' ')
             print('Processing call %s %s' % (self.trigger_word, word[1]))
             return self.retrieve(word[1])
+        
+            
 
     def submenu(self):
         source = self.url

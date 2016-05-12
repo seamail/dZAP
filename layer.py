@@ -5,7 +5,7 @@ import sys
 from time import *
 
 from yowsup.common import YowConstants
-from yowsup.common.tools import ModuleTools
+
 from yowsup.layers import YowLayerEvent
 from yowsup.layers.auth import YowAuthenticationProtocolLayer
 from yowsup.layers.interface import YowInterfaceLayer, ProtocolEntityCallback
@@ -23,6 +23,9 @@ from yowsup.layers.protocol_presence.protocolentities import *
 from yowsup.layers.protocol_privacy.protocolentities import *
 from yowsup.layers.protocol_profiles.protocolentities import *
 from yowsup.layers.protocol_receipts.protocolentities import *
+
+from yowsup.common.tools import Jid
+from yowsup.common.optionalmodules import PILOptionalModule, AxolotlOptionalModule
 
 from cli import Cli, clicmd
 from bot import Bot
@@ -216,24 +219,22 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     @clicmd("Set profile picture")
     def profile_setPicture(self, path):
-        if self.assertConnected() and ModuleTools.INSTALLED_PIL():
+        if self.assertConnected():
+            with PILOptionalModule(failMessage = "No PIL library installed, try install pillow") as imp:
+                Image = imp("Image")
+                def onSuccess(resultIqEntity, originalIqEntity):
+                    self.output("Profile picture updated successfully")
 
-            def onSuccess(resultIqEntity, originalIqEntity):
-                self.output("Profile picture updated successfully")
+                def onError(errorIqEntity, originalIqEntity):
+                    logger.error("Error updating profile picture")
 
-            def onError(errorIqEntity, originalIqEntity):
-                logger.error("Error updating profile picture")
-
-            #example by @aesedepece in https://github.com/tgalal/yowsup/pull/781
-            #modified to support python3
-            from PIL import Image
-            src = Image.open(path)
-            pictureData = src.resize((640, 640)).tobytes("jpeg", "RGB")
-            picturePreview = src.resize((96, 96)).tobytes("jpeg", "RGB")
-            iq = SetPictureIqProtocolEntity(self.getOwnJid(), picturePreview, pictureData)
-            self._sendIq(iq, onSuccess, onError)
-        else:
-            logger.error("Python PIL library is not installed, can't set profile picture")
+                #example by @aesedepece in https://github.com/tgalal/yowsup/pull/781
+                #modified to support python3
+                src = Image.open(path)
+                pictureData = src.resize((640, 640)).tobytes("jpeg", "RGB")
+                picturePreview = src.resize((96, 96)).tobytes("jpeg", "RGB")
+                iq = SetPictureIqProtocolEntity(self.getOwnJid(), picturePreview, pictureData)
+                self._sendIq(iq, onSuccess, onError)
 
     ########### groups
 
@@ -292,24 +293,24 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     @clicmd("Set group picture")
     def group_picture(self, group_jid, path):
-        if self.assertConnected() and ModuleTools.INSTALLED_PIL():
+        if self.assertConnected():
+            with PILOptionalModule(failMessage = self.__class__.FAIL_OPT_PILLOW) as imp:
+                Image = imp("Image")
 
-            def onSuccess(resultIqEntity, originalIqEntity):
-                self.output("Group picture updated successfully")
+                def onSuccess(resultIqEntity, originalIqEntity):
+                    self.output("Group picture updated successfully")
 
-            def onError(errorIqEntity, originalIqEntity):
-                logger.error("Error updating Group picture")
+                def onError(errorIqEntity, originalIqEntity):
+                    logger.error("Error updating Group picture")
 
-            #example by @aesedepece in https://github.com/tgalal/yowsup/pull/781
-            #modified to support python3
-            from PIL import Image
-            src = Image.open(path)
-            pictureData = src.resize((640, 640)).tobytes("jpeg", "RGB")
-            picturePreview = src.resize((96, 96)).tobytes("jpeg", "RGB")
-            iq = SetPictureIqProtocolEntity(self.aliasToJid(group_jid), picturePreview, pictureData)
-            self._sendIq(iq, onSuccess, onError)
-        else:
-            logger.error("Python PIL library is not installed, can't set profile picture")
+                #example by @aesedepece in https://github.com/tgalal/yowsup/pull/781
+                #modified to support python3
+                src = Image.open(path)
+                pictureData = src.resize((640, 640)).tobytes("jpeg", "RGB")
+                picturePreview = src.resize((96, 96)).tobytes("jpeg", "RGB")
+                iq = SetPictureIqProtocolEntity(self.aliasToJid(group_jid), picturePreview, pictureData)
+                self._sendIq(iq, onSuccess, onError)        
+
 
     @clicmd("Get group info")
     def group_info(self, group_jid):
@@ -319,23 +320,21 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
 
     @clicmd("Get shared keys")
     def keys_get(self, jids):
-        if ModuleTools.INSTALLED_AXOLOTL():
+        with AxolotlOptionalModule(failMessage = self.__class__.FAIL_OPT_AXOLOTL) as importFn:
+            importFn()
             from yowsup.layers.axolotl.protocolentities.iq_key_get import GetKeysIqProtocolEntity
             if self.assertConnected():
                 jids = [self.aliasToJid(jid) for jid in jids.split(',')]
                 entity = GetKeysIqProtocolEntity(jids)
                 self.toLower(entity)
-        else:
-            logger.error("Axolotl is not installed")
+
 
     @clicmd("Send prekeys")
     def keys_set(self):
-        if ModuleTools.INSTALLED_AXOLOTL():
+        with AxolotlOptionalModule(failMessage = self.__class__.FAIL_OPT_AXOLOTL) as axoOptMod:
             from yowsup.layers.axolotl import YowAxolotlLayer
             if self.assertConnected():
                 self.broadcastEvent(YowLayerEvent(YowAxolotlLayer.EVENT_PREKEYS_SET))
-        else:
-            logger.error("Axolotl is not installed")
 
     @clicmd("Send init seq")
     def seq(self):
@@ -362,9 +361,27 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
     @clicmd("Send message to a friend")
     def message_send(self, number, content):
         #if self.assertConnected():
-        outgoingMessage = TextMessageProtocolEntity(content.encode("utf-8") if sys.version_info >= (3,0) else content, to = self.aliasToJid(number))
-        self.toLower(outgoingMessage)
-        return outgoingMessage
+        
+        print("~~~~~~~~~~~~~~~~~~ %s" % number)#MODF
+        x = self.aliasToJid(number)
+        print("%s/%i" % (x,len(x)))
+        print(content)
+        print(type(content))
+
+        #originalMessage = TextMessageProtocolEntity(content[:127].encode("utf-8") if sys.version_info >= (3,0) else content, to = self.aliasToJid(number))
+        originalMessage = TextMessageProtocolEntity(content.encode("utf-8") if sys.version_info >= (3,0) else content, to = self.aliasToJid(number))
+        self.toLower(originalMessage)
+        """while len(content.encode('latin-1')) > 127:
+            TXTFragment = content.encode('latin-1')[:127].decode('latin-1')
+            outgoingMessage = TextMessageProtocolEntity(TXTFragment if sys.version_info >= (3,0) else TXTFragment.decode('latin-1'), to = self.aliasToJid(number))
+            self.toLower(outgoingMessage)
+            sleep(3)
+            X = len(TXTFragment)
+            content = content[X:]
+        if len(content):
+            outgoingMessage = TextMessageProtocolEntity(content.encode("utf-8") if sys.version_info >= (3,0) else content, to = self.aliasToJid(number))
+            self.toLower(outgoingMessage)"""           
+        return originalMessage
 
     @clicmd("Broadcast message. numbers should comma separated phone numbers")
     def message_broadcast(self, numbers, content):
@@ -537,7 +554,8 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
                 elif BOTSAYS[-3:] == 'wav':
                     self.audio_send(message.getFrom(), BOTSAYS)
                 else:
-                    self.message_send(message.getFrom(), BOTSAYS)
+                    
+                    self.message_send(message.getFrom().split("@")[0], BOTSAYS)
 
         #end message custom functionality.
 

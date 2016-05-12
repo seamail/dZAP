@@ -193,7 +193,58 @@ def retrieve_salmo():
 
     return salmo
 
+def createLike(text):
 
+    if len(text) > 40:
+        return "Texto gigante demais, não será possivel."
+    textsplit = text.split(" ")
+
+    s0 = []
+    s = ["","","",""]
+    for k in range(4):
+        s0.append("")
+    I=0
+    for word in textsplit:
+        if len(s0[I] + word) > 9:
+            I += 1
+        s0[I] += " " + word
+
+    if len(s0) == 4:
+        for l in range(len(s0)):
+            s[l] = s0[l]
+    elif len(s0) < 4:
+        for l in range(len(s0)):
+            s[l + 1] = s0[l]
+
+
+    for i in range(len(s)):
+        x = 10 - len(s[i])
+        x //= 2
+        s[i] = "░"*x + s[i] + "░"*x
+        if len(s[i]) < 10:
+            s[i] += "░"
+    like = """
+            ▄▄
+           █░░█
+           █░░█
+          █░░░█
+         █░░░░█
+███████▄▄█░░░░░██████▄
+▓▓▓▓▓▓█░░░░░░░░░░░░░█
+▓▓▓▓▓▓█░░%s░░█
+▓▓▓▓▓▓█░░%s░░█
+▓▓▓▓▓▓█░░%s░░█
+▓▓▓▓▓▓█░░%s░░█
+▓▓▓▓▓▓█████░░░░░░░░░█
+██████▀░░░░▀▀██████▀""" % (s[0],s[1],s[2],s[3])
+
+
+    return like
+
+def markovAdd(text):
+    Fo = open('../markovData.txt', 'a+')
+    Fo.write(text)
+    Fo.close()
 class Vestibular():
     def __init__(self, group, participants, cli, bot):
         self.scores = []

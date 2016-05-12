@@ -3,7 +3,8 @@ from random import *
 from time import *
 
 from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
-    wikipedia, retrieve_porn, retrieve_salmo, retrieve_locality
+    wikipedia, retrieve_porn, retrieve_salmo, retrieve_locality, createLike, \
+    markovAdd
 from bot.retrieve import AUTO_RETRIEVE
 
 from urllib.request import urlopen
@@ -54,6 +55,9 @@ class Bot:
                 self.ban_words.append([line[0], line[1]])
 
     def read_output(self, output, sender, participant):
+        if not self.window: return
+        else:
+            if not self.window.LOADED: return
         output = output.lower()
         current_time = time()
 
@@ -180,12 +184,17 @@ class Bot:
             if ' moderno' in output:
                 self.sendimage(sender, 'https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=12&size=640x480&key=AIzaSyAN8DCnslHInk8dHFFQIPPI9-W-eP4sly8'
                                          %(Result[3][0],Result[3][1]))
-            return "Voce devia ir pra %s, %s..." % (Result[0], Result[1])
+            Flavor = ['vagabundear', 'passear', 'vender seus artesanatos',
+                      'manguear']
+            F = choice(Flavor)
+            return "Voce devia ir %s em %s/%s..." % (F, Result[0], Result[1])
+        elif '@like' in output:
+            return createLike(output[6:])
         for auto in AUTO_RETRIEVE:
             out = auto.trigger(output)
-            if auto.trigger(output):
+            if out:
                 return out
-        if self.chat:
+        if self.chat and len(output):
             if output[0] == '>':
                 self.chat.read(output[1:0])
                 return self.chat.respond(output[1:])
@@ -193,14 +202,24 @@ class Bot:
             else:
                 if len(output) < 46:
                     self.chat.read(output)
+                    markovAdd(output)
                     rep = self.chat.respond(output)
                     if randrange(100) < self.window.BOTRESPONSE.get(): return rep
                     return
+                
 
     def getCliLayer(self, layer):
         self.CliLayer = layer
 
     def sendmessage(self, to, msg):
+
+        print(to)
+        # send fragmented message as recommended yowsup version
+        # cant send group messages bigger than 128 chars.
+        while len(msg) > 127:
+            self.CliLayer.message_send(to, msg[:127])
+            msg = msg[128:]
+
         self.CliLayer.message_send(to, msg)
 
     def sendimage(self, to, url):
