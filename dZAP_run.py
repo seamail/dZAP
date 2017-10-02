@@ -35,11 +35,12 @@ from yowsup.env import YowsupEnv
 
 from bot.retrieve import AUTO_RETRIEVE
 
-
-#load credentials from the CREDENTIALS file in working folder.. template:
-
-#phone=*************
-#password=**********
+from interface import setupInterface
+'''
+ load credentials from the CREDENTIALS file in working folder.. template:
+phone=*************
+password=**********
+'''
 def retrieve_credentials():
     if os.path.isfile('CREDENTIALS'):
         _CRED = open('CREDENTIALS', 'r').readlines()
@@ -199,94 +200,24 @@ class window(Thread):
         if len(sent) > 0:
             self.showmessage(MSG, TO = ">>> %s" % sent)
 
-    def run(self):#this function is started on __init___, because the window is a Thread. Initialize GUI and its widgets and menus.
-        self.root = Tk()
-        self.root.protocol("WM_DELETE_WINDOW", self.callback)
-        self.root.resizable(width=FALSE, height=FALSE)
+    def run(self):
+        # this function is started on __init___,
+        # because the window is a Thread. Initialize GUI and its widgets and menus.
 
-        self.VISOR = Frame(self.root, height = 600, width=500,borderwidth=3,relief=GROOVE)
-        self.VISOR.grid(column=2,row=0,columnspan=4,)
-        self.VISOR.grid_propagate(False)
-        '''for I in range(10):
-            self.SHOWNMESSAGE.append(displayed_message(" ", " ", " ", master=self.VISOR))
-            self.SHOWNMESSAGE[I].grid(column=0, row=I)'''
+        setupInterface(self, BOT)
 
-        self.TEXTIN = Text(self.root, height=2, width=73)
-        self.TEXTIN.grid(column=0,row=1,columnspan=6, sticky=W+E)
-        
-        self.SEND = Button(self.root, text = 'SEND', command = lambda: self.sendtext()).grid(column=0,row=2,columnspan=6, sticky=W+E)
-        self.SENDVOICE = Button(self.root, text= 'SENDVOICE', command = self.send_voice).grid(column=2,row=3)
-        self.REFRESH = Button(self.root, text = 'REFRESH', command = self.getinfo).grid(column=3,row=4)
-        self.LOADMSG = Button(self.root, text = 'load MSG', command = self.refresh_message).grid(column=3,row=3)
-        self.ADM = Button(self.root, text = 'toADM')
-        self.ADM["command"] = lambda: self.YOWCLI.group_promote(self.GROUPS[2].address, self.TEXTIN.get("1.0",END)[:-1])
-        self.ADM.grid(column=4,row=3)
-        self.BROWSE = Button(self.root, text= 'browse file')
-        self.BROWSE["command"] = lambda: self.browsefiles(self.TEXTIN)
-        self.BROWSE.grid(column=2, row=4)
-
-        self.BOTRESPONSE = Scale(self.root, from_=100, to=0)
-        self.BOTRESPONSE.grid(column=0, row=3, rowspan=2)
-        
-        self.contactlist = Frame(self.root,borderwidth=3,relief=GROOVE)
-        self.contactlist.grid(column=0,row=0,sticky=NS)
-    
-        self.root.wm_title(self.NAME)
-        self.menubar = Menu(self.root)
-
-        self.AUTOMATE = Menu(self.menubar)
-        self.AUTOMATE.add_command(label="Turn ON/OFF", background="red")
-        self.AUTOMATE.add_command(label="MANAGE", command = lambda: self.automate_window())
-        self.AUTOMATE.add_separator()
-        self.AUTOMATE.add_command(label ="@dict", command = lambda: self.sendtext(event='@dict'))
-        self.AUTOMATE.add_command(label ="@indict", command = lambda: self.sendtext(event='@indict'))
-        self.AUTOMATE.add_command(label ="@wiki", command = lambda: self.sendtext(event='@wiki'))
-        self.AUTOMATE.add_command(label ="@kkk", command = lambda: self.sendtext(event='@kkk'))
-        self.AUTOMATE.add_command(label ='Vestibular', command = lambda: BOT.govestibular(self.GROUPS[self.highlighted_group()].address))
-
-        self.PROFILE = Menu(self.menubar)
-        self.PROFILE.add_command(label="SET NICK", command = lambda: self.edit_profile('nick'))
-        self.PROFILE.add_command(label="SET STATUS",  command = lambda: self.edit_profile('status'))
-        self.PROFILE.add_command(label="SET IMAGE", command = lambda: self.edit_profile('image'))
-
-        self.GROUP = Menu(self.menubar)
-        self.GROUP.add_command(label="SET GROUP NAME", command = lambda: self.edit_profile('group name'))
-        self.GROUP.add_command(label="SET GROUP IMAGE", command = lambda: self.edit_profile('group image'))
-        self.GROUP.add_separator()
-        self.GROUP.add_command(label="BAN")
-        self.GROUP.add_command(label="demote ALL", command = lambda: self.admin_toall(0))
-        self.GROUP.add_command(label="promote ALL", command = lambda: self.admin_toall(1))
-
-        self.FILES = Menu(self.menubar)
-        self.FILES.add_command(label="SEND IMAGE", command = lambda: self.YOWCLI.image_send(self.highlighted_group().address, self.TEXTIN.get('1.0',END)[:-1]))
-
-        self.NETWORK = Menu(self.menubar)
-        #self.NETWORK.add_command((label="Send ACK", command = lambda: self.YOWCLI.      
-        self.menubar.add_cascade(label = "PROFILE", menu = self.PROFILE)
-        self.menubar.add_cascade(label = "GROUP", menu = self.GROUP)
-        self.menubar.add_cascade(label = "AUTOMATE", menu = self.AUTOMATE)
-        self.menubar.add_cascade(label = 'FILES', menu = self.FILES)
-
-        self.root.config(menu=self.menubar)
-
-
-
-        
-
-
-        
         sleep(2)
         self.getinfo()
         self.LOADED = 1
         self.root.mainloop()
 
-    def edit_profileSAVEQUIT(self,attribute):
+    def edit_profileSAVEQUIT(self, attribute):
         if attribute == 'nick':
-            self.YOWCLI.presence_name(self.editprofile.TEXT.get('1.0',END))
+            self.YOWCLI.presence_name(self.editprofile.TEXT.get('1.0',END)[:-1])
         elif attribute == 'status':
             self.YOWCLI.profile_setStatus(self.editprofile.TEXT.get('1.0',END).encode('utf-8'))
         elif attribute == 'image':
-            self.YOWCLI.profile_setPicture(self.editprofile.TEXT.get('1.0',END)[:-1])
+            self.YOWCLI.profile_setPicture(self.editprofile.TEXT.get('1.0',END).replace('\n', ''))
         else:
             for G in self.GROUPS:
                 if G.ACTIVE:
@@ -411,7 +342,7 @@ class window(Thread):
         if len(H) == 1:
             return H[0]
 
-    def admin_toall(self, demotepromote):#demote all admins on a group, but yourself.
+    def admin_toall(self, demotepromote):# demote all admins on a group but yourself.
         group = self.highlighted_group()
         print(group)
         if group:

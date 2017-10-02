@@ -38,7 +38,7 @@ def retrieve_joke():
         if b'Continuar Lendo' in line:
             z = line.find(b'<a href="')
             if z >= 0:
-                k = line.find(b'">', z)
+                k = line.find(b'" class=', z)
                 joke.append(line[z + 9:k])
 
         if b'No momento, ' in line:
@@ -54,6 +54,9 @@ def retrieve_joke():
     except UnicodeDecodeError:
         print("decoding failed.")
         return retrieve_joke()
+    except urllib.error.HTTPError:
+        print("failed to reach %s" % url+chosen_joke)
+        return ""
 
     z = joke_content.find('<div class="field-items" id="md4">')
     k = joke_content.find(
@@ -503,3 +506,26 @@ def retrieve_locality(Ilat,Ilng):
     Result.append([middlelat,middlelng])
     
     return Result
+
+
+def retrieve_codigoPenal(art):
+    URL = "http://www.planalto.gov.br/ccivil_03/decreto-lei/Del2848compilado.htm"
+    print("searching for art %s" % art)
+    if art[-1] == '\n':
+        art=art[:-1]
+    try:
+        source = urlopen(URL).read()
+    except:
+        return "Fail."
+
+    R = "Art. %s" % art
+    K = "</font>"
+
+    Rx = source.find(R)
+    Kx = source.find(K, beg=Rx)
+
+    txtArt = source[Rx + len(R):Kx]
+    
+    print(">%s" % txtArt)
+    return txtArt
+        

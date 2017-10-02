@@ -19,11 +19,15 @@ class _Retrieve:
             error_key=b'koytr1we0ewrt',
             charset='latin-1',
             Mftrim = None,
-            Mbtrim = '"'
+            Mbtrim = '"',
+            CallableByChat=False
+            
     ):
         self.url = url
         self.trigger_word = callword
-
+        
+        self.CallableByChat = CallableByChat
+        
         self.front_trim = ftrim
         self.back_trim = btrim
         self.front_rebound_trim = frtrim
@@ -37,6 +41,8 @@ class _Retrieve:
         self.error_key = error_key
 
     def trigger(self, IN):
+        if not self.trigger_word:
+            return
         if self.trigger_word in IN:
             word = IN.split(' ')
             print('Processing call %s %s' % (self.trigger_word, word[1]))
@@ -90,6 +96,7 @@ class _Retrieve:
         return content
 
 
+
 _RETRIEVER_DICIO = _Retrieve(
     '@dict',
     'http://www.dicio.com.br/pesquisa.php?q=',
@@ -128,6 +135,11 @@ _RETRIEVER_JOKE = _Retrieve(
     
 )
 
+_RETRIEVER_NOTICIA = _Retrieve(
+    False,
+    'https://www.piadas.com.br',
+    
+)
 AUTO_RETRIEVE = (
     _RETRIEVER_DICIO,
     _RETRIEVER_DICIONARIO_INFORMAL,

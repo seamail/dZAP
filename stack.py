@@ -24,7 +24,7 @@ class YowsupCliStack(object):
         self.stack.broadcastEvent(YowLayerEvent(YowsupCliLayer.EVENT_START))
 
         try:
-            self.stack.loop(timeout = 6666, discrete = 30*24*60*60)
+            self.stack.loop(timeout = 0.5, discrete = 0.5)
         except AuthError as e:
             print("Auth Error, reason %s" % e)
         except KeyboardInterrupt:

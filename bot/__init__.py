@@ -4,7 +4,7 @@ from time import *
 
 from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
     wikipedia, retrieve_porn, retrieve_salmo, retrieve_locality, createLike, \
-    markovAdd
+    markovAdd, retrieve_codigoPenal
 from bot.retrieve import AUTO_RETRIEVE
 
 from urllib.request import urlopen
@@ -190,6 +190,8 @@ class Bot:
             return "Voce devia ir %s em %s/%s..." % (F, Result[0], Result[1])
         elif '@like' in output:
             return createLike(output[6:])
+        elif '@art' in output:
+            return retrieve_codigoPenal(output.split(" ")[1])
         for auto in AUTO_RETRIEVE:
             out = auto.trigger(output)
             if out:

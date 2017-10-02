@@ -505,12 +505,14 @@ class YowsupCliLayer(Cli, YowInterfaceLayer):
         formattedDate = datetime.datetime.fromtimestamp(message.getTimestamp()).strftime('%d-%m-%Y %H:%M')
 
         if message.getType() == "text":
-            message.body = message.body.encode('latin-1', 'ignore').decode('utf-8','ignore') 
-            self.MESSAGES.append(message)
             try:
-                message.getBody().encode('utf-8')
-            except UnicodeEncodeError:
-                return
+                if type(message.body) == str:
+                    message.body = message.body.encode('latin-1', 'ignore').decode('utf-8','ignore')
+                elif type(message.body) == bytes:
+                    message.body = message.body.decode('utf-8', 'ignore')
+            except AttributeError:
+                pass
+            self.MESSAGES.append(message)
 
             
             if BOT.window:
