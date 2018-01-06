@@ -367,23 +367,23 @@ if __name__==  "__main__":
     StackBuilder = YowStackBuilder()
     stack = StackBuilder.getDefaultStack(layer=YowsupCliLayer, axolotl=True)
     
-    stack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, CREDENTIALS)         #setting credentials
-    stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])    #whatsapp server address
+    stack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, CREDENTIALS) #setting credentials
+    stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])     #whatsapp server address
     stack.setProp(YowCoderLayer.PROP_DOMAIN, YowConstants.DOMAIN)
     stack.setProp(YowCoderLayer.PROP_RESOURCE, YowsupEnv.getCurrent().getResource())     #info about us as WhatsApp client
-    stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))   #sending the connect signal
+    stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))             #sending the connect signal
 
     
     for i in range(9):
         #print(str(i)+" = "+str(stack.getLayer(i)))
         if str(stack.getLayer(i)) == "CLI Interface Layer":
-               X = stack.getLayer(i)
+               InterfaceLayer = stack.getLayer(i)
                break
             
     #print(X)
     
     #setting bot and cli layer to know each other.
-    BOT = X.getBot()
+    BOT = InterfaceLayer.getBot()
     BOT.getCliLayer(X)
 
     #print(BOT.CliLayer)

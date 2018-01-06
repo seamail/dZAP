@@ -2,17 +2,18 @@ import os.path
 from random import *
 from time import *
 
-from bot.core import Vestibular, retrieve_joke, create_voice, psicologo, \
+from bot.core import retrieve_joke, create_voice, psicologo, \
     wikipedia, retrieve_porn, retrieve_salmo, retrieve_locality, createLike, \
-    markovAdd, retrieve_codigoPenal
+    markovAdd
 from bot.retrieve import AUTO_RETRIEVE
+
+from .quiz import Vestibular, retrieve_codigoPenal
+from .hippie import retrieve_locality
 
 from urllib.request import urlopen
 
 #Choose to load the conversation bot. It requires chatterbot module and mongoDB.
 LOAD_CONVERSATION_BOT = True
-
-
 
 class Bot:
 
