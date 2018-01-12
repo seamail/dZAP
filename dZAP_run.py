@@ -33,7 +33,7 @@ from yowsup.layers.protocol_receipts import YowReceiptProtocolLayer
 from yowsup.layers.axolotl import AxolotlSendLayer, AxolotlControlLayer, AxolotlReceivelayer
 from yowsup.env import YowsupEnv
 
-from bot.retrieve import AUTO_RETRIEVE
+
 
 from interface import setupInterface
 '''
@@ -384,12 +384,12 @@ if __name__==  "__main__":
     
     #setting bot and cli layer to know each other.
     BOT = InterfaceLayer.getBot()
-    BOT.getCliLayer(X)
+    BOT.getCliLayer(InterfaceLayer)
 
     #print(BOT.CliLayer)
 
     #starting the GUI and client; set BOT to recognize the window instance.
-    app = window(X)
+    app = window(InterfaceLayer)
     
     BOT.window = app
     stack.loop()

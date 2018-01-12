@@ -27,6 +27,10 @@ def setupInterface(frontend, BOT):
     frontend.BROWSE = Button(frontend.root, text= 'browse file')
     frontend.BROWSE["command"] = lambda: frontend.browsefiles(frontend.TEXTIN)
     frontend.BROWSE.grid(column=2, row=4)
+
+    frontend.QUIT = Button(frontend.root, text = 'EXIT')
+    frontend.QUIT["command"] = lambda: frontend.root.destroy()
+    frontend.QUIT.grid(column=4, row=4)
     
     frontend.BOTRESPONSE = Scale(frontend.root, from_=100, to=0)
     frontend.BOTRESPONSE.grid(column=0, row=3, rowspan=2)
